@@ -1,0 +1,121 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+
+//======================================================================
+// PROJECT
+//======================================================================
+
+version = '1.0-SNAPSHOT'
+group = 'com.sony.ebs.octopus3'
+
+//======================================================================
+// REPOSITORIES
+//======================================================================
+
+buildscript {
+    repositories {
+        mavenLocal()
+        maven { url 'https://mvn.sony-europe.com/content/groups/global' }
+        mavenCentral()
+        maven { url "http://oss.jfrog.org/repo" }
+    }
+    dependencies {
+        classpath "org.gradle.api.plugins:gradle-nexus-plugin:0.7"
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.0.2"
+        classpath "io.ratpack:ratpack-gradle:0.9.7-SNAPSHOT"
+    }
+}
+
+repositories {
+    mavenLocal()
+    maven { url "https://mvn.sony-europe.com/content/groups/global" }
+    maven { url "http://oss.jfrog.org/repo" }
+    maven { url "http://repo.springsource.org/repo" }
+    maven { url "http://repo.spring.io/libs-release" }
+    mavenCentral()
+}
+
+//======================================================================
+// PLUGINS
+//======================================================================
+
+apply plugin: "ratpack-groovy"
+apply plugin: "groovy"
+apply plugin: 'idea'
+apply plugin: 'nexus'
+apply plugin: "com.github.johnrengelman.shadow"
+
+//======================================================================
+// CONFIGURATIONS
+//======================================================================
+
+configurations {
+    all {
+        exclude module: "groovy"
+    }
+}
+
+shadowJar {
+    transform(AppendingTransformer) {
+        resource = "META-INF/spring.handlers"
+    }
+    transform(AppendingTransformer) {
+        resource = "META-INF/spring.schemas"
+    }
+}
+
+//======================================================================
+// DEPENDENCIES
+//======================================================================
+
+dependencies {
+    // spring
+    compile "org.springframework:spring-core:4.0.5.RELEASE"
+    compile "org.springframework:spring-context:4.0.5.RELEASE"
+    compile "org.springframework:spring-beans:4.0.5.RELEASE"
+
+    // ratpack
+    compile 'io.ratpack:ratpack-rx:0.9.6'
+    compile 'io.ratpack:ratpack-jackson:0.9.6'
+    //springloaded "org.springsource.springloaded:springloaded-core:1.1.4"
+    testCompile "org.spockframework:spock-core:0.7-groovy-2.0", {
+        exclude module: "groovy-all"
+    }
+
+    // logging
+    compile "org.slf4j:slf4j-api:1.7.5"
+    compile "org.slf4j:slf4j-log4j12:1.7.5"
+
+    // http clients
+    compile 'com.ning:async-http-client:1.8.11', {
+        exclude group: 'io.netty'
+        exclude group: 'org.slf4j'
+        exclude group: 'org.apache.httpcomponents'
+    }
+
+    compile 'org.apache.httpcomponents:httpasyncclient:4.0.1'
+    compile 'org.apache.httpcomponents:httpmime:4.3.4'
+    compile 'org.apache.httpcomponents:httpcore:4.3.2'
+    compile 'org.apache.httpcomponents:httpclient:4.3.4'
+}
+
+
+//======================================================================
+// TASKS
+//======================================================================
+
+task wrapper(type: Wrapper) {
+    gradleVersion = 2.0
+}
+
+//======================================================================
+// DEPLOY ARTIFACTS
+//======================================================================
+
+nexus {
+    attachSources = true
+    attachTests = false
+    attachJavadoc = false
+    sign = false
+    repositoryUrl = 'https://mvn.sony-europe.com/content/repositories/releases'
+    snapshotRepositoryUrl = 'https://mvn.sony-europe.com/content/repositories/snapshots'
+}
