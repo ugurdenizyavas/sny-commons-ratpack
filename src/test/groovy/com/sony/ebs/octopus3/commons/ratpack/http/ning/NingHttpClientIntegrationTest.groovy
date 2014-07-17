@@ -1,13 +1,13 @@
 package com.sony.ebs.octopus3.commons.ratpack.http.ning
 
-import groovy.json.JsonSlurper
+import com.github.dreamhead.moco.Runner
 import groovy.util.logging.Slf4j
-import org.junit.After
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
+import org.apache.commons.lang.math.RandomUtils
+import org.junit.*
 import ratpack.exec.ExecController
 import ratpack.launch.LaunchConfigBuilder
+
+import static com.github.dreamhead.moco.Moco.*
 
 @Slf4j
 class NingHttpClientIntegrationTest {
@@ -15,14 +15,28 @@ class NingHttpClientIntegrationTest {
     ExecController execController
     NingHttpClient ningHttpClient
 
-    String CADC_URL = "https://origin.uat-cadc-loader-lb.sony.eu/syndication/regional/skus/changes/en_GB?since=2014-06-25T00:00:00.000%2B01:00"
+    static Runner runner
+    static String serverUrl
+
+    @BeforeClass
+    static void initOnce() {
+        def server = httpserver(8000 + RandomUtils.nextInt(999))
+        server.get(by(uri("/test1"))).response("xxx")
+
+        runner = Runner.runner(server)
+        runner.start()
+        serverUrl = "http://localhost:${server.port()}/test1"
+    }
+
+    @AfterClass
+    static void tearDownOnce() {
+        runner.stop()
+    }
 
     @Before
     void before() {
         execController = LaunchConfigBuilder.noBaseDir().build().execController
-
-        ningHttpClient = new NingHttpClient(execController.control,
-                "43.194.159.10", 10080, "TRGAEbaseProxy", "badana01", "eu_octopus_syndication", "2khj0xwb")
+        ningHttpClient = new NingHttpClient(execController.control)
     }
 
     @After
@@ -30,28 +44,22 @@ class NingHttpClientIntegrationTest {
         if (execController) execController.close()
     }
 
-    def validate(String result) {
-        log.info "validating $result"
-        def json = new JsonSlurper().parseText(result)
-        assert json.startDate
-        assert json.endDate
-        assert json.skus['en_GB'].size() > 0
-    }
-
     @Test
-    void "test ningHttpClient"() {
+    void "test get"() {
         def finished = new Object()
+        def result
         execController.start {
-            ningHttpClient.doGet(CADC_URL).subscribe { String result ->
+            ningHttpClient.doGet(serverUrl).subscribe { String res ->
                 synchronized (finished) {
-                    validate(result)
+                    result = res
                     finished.notifyAll()
                 }
             }
         }
         synchronized (finished) {
-            finished.wait 10000
+            finished.wait 5000
         }
+        assert result == "xxx"
     }
 
 }

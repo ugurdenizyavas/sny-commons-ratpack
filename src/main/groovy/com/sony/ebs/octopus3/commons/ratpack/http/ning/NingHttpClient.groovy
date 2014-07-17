@@ -40,6 +40,11 @@ class NingHttpClient {
         this.authenticationPassword = authenticationPassword
     }
 
+    public NingHttpClient(ExecControl execControl) {
+        asyncHttpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder().build())
+        this.execControl = execControl
+    }
+
     String getByNing(RequestType requestType, String urlString, String data = null) {
         def url = new URIBuilder(urlString).toString()
 

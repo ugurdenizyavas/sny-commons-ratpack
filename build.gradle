@@ -68,6 +68,9 @@ shadowJar {
 //======================================================================
 
 dependencies {
+
+    compile group:"commons-lang", name:"commons-lang", version:"2.4"
+
     // spring
     compile "org.springframework:spring-core:4.0.5.RELEASE"
     compile "org.springframework:spring-context:4.0.5.RELEASE"
@@ -96,6 +99,11 @@ dependencies {
     compile 'org.apache.httpcomponents:httpmime:4.3.4'
     compile 'org.apache.httpcomponents:httpcore:4.3.2'
     compile 'org.apache.httpcomponents:httpclient:4.3.4'
+
+    testCompile 'com.github.dreamhead:moco-core:0.9.1', {
+        exclude group: 'org.slf4j'
+        exclude group: 'org.apache.httpcomponents'
+    }
 }
 
 
