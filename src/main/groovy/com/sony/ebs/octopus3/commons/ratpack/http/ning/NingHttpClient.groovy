@@ -25,11 +25,18 @@ class NingHttpClient {
 
     }
 
-    public NingHttpClient(ExecControl execControl, String proxyHost, int proxyPort, String proxyUser, String proxyPassword,
+    public NingHttpClient(ExecControl execControl, String proxyHost, int proxyPort,
+                          String proxyUser, String proxyPassword, String nonProxyHosts,
                           String authenticationUser, String authenticationPassword) {
         AsyncHttpClientConfig config
         if (proxyHost) {
-            config = new AsyncHttpClientConfig.Builder().setProxyServer(new ProxyServer(proxyHost, proxyPort, proxyUser, proxyPassword)).build()
+            def proxyServer = new ProxyServer(proxyHost, proxyPort, proxyUser, proxyPassword)
+            if (nonProxyHosts) {
+                nonProxyHosts.split(",")?.collect { it.trim() }.each {
+                    proxyServer.addNonProxyHost(it)
+                }
+            }
+            config = new AsyncHttpClientConfig.Builder().setProxyServer(proxyServer).build()
         } else {
             config = new AsyncHttpClientConfig.Builder().build()
         }
