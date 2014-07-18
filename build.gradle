@@ -90,7 +90,6 @@ dependencies {
 
     // http clients
     compile 'com.ning:async-http-client:1.8.11', {
-        exclude group: 'io.netty'
         exclude group: 'org.slf4j'
         exclude group: 'org.apache.httpcomponents'
     }
