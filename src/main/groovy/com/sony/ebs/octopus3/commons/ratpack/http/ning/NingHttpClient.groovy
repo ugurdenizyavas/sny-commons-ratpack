@@ -65,7 +65,10 @@ class NingHttpClient {
         } else if (RequestType.DELETE == requestType) {
             f = asyncHttpClient.prepareDelete(url).addHeader('Accept-Charset', 'UTF-8').setRealm(realm).execute()
         } else {
-            f = asyncHttpClient.preparePost(url).addHeader('Accept-Charset', 'UTF-8').setRealm(realm).setBody(data).execute()
+            f = asyncHttpClient.preparePost(url)
+                    .addHeader('Accept-Charset', 'UTF-8')
+                    .addHeader('Content-Type', 'multipart/form-data')
+                    .setRealm(realm).setBody(data).execute()
         }
         def response = f.get()
 
