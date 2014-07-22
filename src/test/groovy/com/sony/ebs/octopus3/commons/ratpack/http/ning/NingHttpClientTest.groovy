@@ -11,7 +11,7 @@ import spock.util.concurrent.BlockingVariable
 import static com.github.dreamhead.moco.Moco.*
 
 @Slf4j
-class NingHttpClientIntegrationTest {
+class NingHttpClientTest {
 
     static ExecController execController
     NingHttpClient ningHttpClient
