@@ -1,14 +1,13 @@
 package com.sony.ebs.octopus3.commons.ratpack.http.ning
 
 import com.ning.http.client.AsyncHttpClient
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder
 import com.ning.http.client.AsyncHttpClientConfig
 import com.ning.http.client.ProxyServer
 import com.ning.http.client.Realm
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
 import ratpack.exec.ExecControl
-
-import static ratpack.rx.RxRatpack.observe
 
 @Slf4j
 class NingHttpClient {
@@ -22,7 +21,6 @@ class NingHttpClient {
     AsyncHttpClient asyncHttpClient
 
     public NingHttpClient() {
-
     }
 
     public NingHttpClient(ExecControl execControl, String proxyHost, int proxyPort,
@@ -52,51 +50,50 @@ class NingHttpClient {
         this.execControl = execControl
     }
 
-    String getByNing(RequestType requestType, String urlString, String data = null) {
+    private def executeRequest(RequestType requestType, String urlString, String data = null) {
         def url = new URIBuilder(urlString).toString()
 
         log.info "starting $requestType for $url"
 
         Realm realm = authenticationUser ? (new Realm.RealmBuilder()).setScheme(Realm.AuthScheme.BASIC).setPrincipal(authenticationUser).setPassword(authenticationPassword).build() : null
 
-        def f
+        BoundRequestBuilder requestBuilder
         if (RequestType.GET == requestType) {
-            f = asyncHttpClient.prepareGet(url).addHeader('Accept-Charset', 'UTF-8').setRealm(realm).execute()
+            requestBuilder = asyncHttpClient.prepareGet(url).addHeader('Accept-Charset', 'UTF-8').setRealm(realm)
         } else if (RequestType.DELETE == requestType) {
-            f = asyncHttpClient.prepareDelete(url).addHeader('Accept-Charset', 'UTF-8').setRealm(realm).execute()
+            requestBuilder = asyncHttpClient.prepareDelete(url).addHeader('Accept-Charset', 'UTF-8').setRealm(realm)
         } else {
-            f = asyncHttpClient.preparePost(url)
+            requestBuilder = asyncHttpClient.preparePost(url)
                     .addHeader('Accept-Charset', 'UTF-8')
                     .addHeader('Content-Type', 'multipart/form-data')
-                    .setRealm(realm).setBody(data).execute()
+                    .setRealm(realm).setBody(data)
         }
-        def response = f.get()
-
-        if (response.statusCode != 200 && response.statusCode != 202) {
-            def message = "error getting $url with http status code $response.statusCode"
-            log.error message
-            throw new Exception(message)
-        } else {
-            log.info "finished $requestType for $url with status code $response.statusCode"
-            return response.responseBody
-        }
+        requestBuilder.execute()
     }
 
-    rx.Observable<String> getObservableNing(RequestType requestType, String url, String data = null) {
-        observe(execControl.blocking {
-            getByNing(requestType, url, data)
+    rx.Observable<String> executeRequestObservable(RequestType requestType, String url, String data = null)
+            throws Exception {
+        rx.Observable.from(executeRequest(requestType, url, data)).map({ response ->
+            if (response.statusCode < 200 || response.statusCode > 299) {
+                def message = "error getting $response.uri with http status code $response.statusCode"
+                log.error message
+                throw new Exception(message)
+            }
+            log.error "finished getting $response.uri with http status code $response.statusCode"
+            response.responseBody
         })
     }
 
-    rx.Observable<String> doGet(String url) {
-        getObservableNing(RequestType.GET, url)
+    rx.Observable<String> doGet(String url) throws Exception {
+        executeRequestObservable(RequestType.GET, url)
     }
 
-    rx.Observable<String> doPost(String url, String data) {
-        getObservableNing(RequestType.POST, url, data)
+    rx.Observable<String> doPost(String url, String data) throws Exception {
+        executeRequestObservable(RequestType.POST, url, data)
     }
 
-    rx.Observable<String> doDelete(String url) {
-        getObservableNing(RequestType.DELETE, url)
+    rx.Observable<String> doDelete(String url) throws Exception {
+        executeRequestObservable(RequestType.DELETE, url)
     }
+
 }
