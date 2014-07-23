@@ -79,7 +79,7 @@ class NingHttpClient {
                 log.error message
                 throw new Exception(message)
             }
-            log.error "finished getting $response.uri with http status code $response.statusCode"
+            log.info "finished getting $response.uri with http status code $response.statusCode"
             response.responseBody
         })
     }
