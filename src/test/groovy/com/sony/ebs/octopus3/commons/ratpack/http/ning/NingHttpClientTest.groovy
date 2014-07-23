@@ -45,11 +45,11 @@ class NingHttpClientTest {
     void runFlow(String url, String expected) {
         def result = new BlockingVariable<String>(5)
         execController.start {
-            ningHttpClient.doGet(url)
-                    .doOnError({
-                result.set("error")
-            }).subscribe({
+            ningHttpClient.doGet(url).subscribe({
                 result.set(it)
+            }, {
+                log.error "error in flow", it
+                result.set("error")
             })
         }
         assert result.get() == expected
