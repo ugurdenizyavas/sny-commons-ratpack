@@ -9,6 +9,8 @@ import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
 import ratpack.exec.ExecControl
 
+import static ratpack.rx.RxRatpack.observe
+
 @Slf4j
 class NingHttpClient {
 
@@ -34,9 +36,16 @@ class NingHttpClient {
                     proxyServer.addNonProxyHost(it)
                 }
             }
-            config = new AsyncHttpClientConfig.Builder().setProxyServer(proxyServer).build()
+            config = new AsyncHttpClientConfig.Builder()
+                    .setProxyServer(proxyServer)
+                    .setConnectionTimeoutInMs(2000)
+                    .setRequestTimeoutInMs(10000)
+                    .build()
         } else {
-            config = new AsyncHttpClientConfig.Builder().build()
+            config = new AsyncHttpClientConfig.Builder()
+                    .setConnectionTimeoutInMs(2000)
+                    .setRequestTimeoutInMs(10000)
+                    .build()
         }
         asyncHttpClient = new AsyncHttpClient(config)
 
@@ -73,15 +82,17 @@ class NingHttpClient {
 
     rx.Observable<String> executeRequestObservable(RequestType requestType, String url, String data = null)
             throws Exception {
-        rx.Observable.from(executeRequest(requestType, url, data)).map({ response ->
-            if (response.statusCode < 200 || response.statusCode > 299) {
-                def message = "error getting $response.uri with http status code $response.statusCode"
-                log.error message
-                throw new Exception(message)
-            }
-            log.info "finished getting $response.uri with http status code $response.statusCode"
-            response.responseBody
-        })
+        observe(execControl.blocking({
+            rx.Observable.from(executeRequest(requestType, url, data)).map({ response ->
+                if (response.statusCode < 200 || response.statusCode > 299) {
+                    def message = "error getting $response.uri with http status code $response.statusCode"
+                    log.error message
+                    throw new Exception(message)
+                }
+                log.info "finished getting $response.uri with http status code $response.statusCode"
+                response.responseBody
+            }).toBlocking().single()
+        }))
     }
 
     rx.Observable<String> doGet(String url) throws Exception {
