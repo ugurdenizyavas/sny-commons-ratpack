@@ -32,7 +32,7 @@ class NingHttpClient {
         if (proxyHost) {
             def proxyServer = new ProxyServer(proxyHost, proxyPort, proxyUser, proxyPassword)
             if (nonProxyHosts) {
-                nonProxyHosts.split(",")?.collect { it.trim() }.each {
+                nonProxyHosts.split(",")?.collect({ it.trim() })?.each {
                     proxyServer.addNonProxyHost(it)
                 }
             }
