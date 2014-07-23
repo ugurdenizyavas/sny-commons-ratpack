@@ -15,22 +15,25 @@ buildscript {
     repositories {
         mavenLocal()
         maven { url 'https://mvn.sony-europe.com/content/groups/global' }
+        maven { url 'http://repo.spring.io/libs-release-remote' }
+        maven { url 'http://repo.spring.io/plugins-release' }
+        maven { url 'http://oss.jfrog.org/repo' }
         mavenCentral()
-        maven { url "http://oss.jfrog.org/repo" }
     }
     dependencies {
-        classpath "org.gradle.api.plugins:gradle-nexus-plugin:0.7"
-        classpath "com.github.jengelman.gradle.plugins:shadow:1.0.2"
-        classpath "io.ratpack:ratpack-gradle:0.9.7-SNAPSHOT"
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.0.2'
+        classpath 'io.ratpack:ratpack-gradle:0.9.7-SNAPSHOT'
     }
 }
 
 repositories {
     mavenLocal()
-    maven { url "https://mvn.sony-europe.com/content/groups/global" }
-    maven { url "http://oss.jfrog.org/repo" }
-    maven { url "http://repo.springsource.org/repo" }
-    maven { url "http://repo.spring.io/libs-release" }
+    maven { url 'https://mvn.sony-europe.com/content/groups/global' }
+    maven { url 'http://oss.jfrog.org/repo' }
+    maven { url 'http://repo.springsource.org/repo' }
+    maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
 }
 
@@ -38,11 +41,14 @@ repositories {
 // PLUGINS
 //======================================================================
 
-apply plugin: "ratpack-groovy"
-apply plugin: "groovy"
+apply plugin: 'ratpack-groovy'
+apply plugin: 'groovy'
 apply plugin: 'idea'
 apply plugin: 'nexus'
-apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-maven'
+apply plugin: 'propdeps-idea'
 
 //======================================================================
 // CONFIGURATIONS
@@ -50,43 +56,60 @@ apply plugin: "com.github.johnrengelman.shadow"
 
 configurations {
     all {
-        exclude module: "groovy"
+        exclude module: 'groovy'
     }
 }
 
 shadowJar {
     transform(AppendingTransformer) {
-        resource = "META-INF/spring.handlers"
+        resource = 'META-INF/spring.handlers'
     }
     transform(AppendingTransformer) {
-        resource = "META-INF/spring.schemas"
+        resource = 'META-INF/spring.schemas'
     }
 }
+
+idea {
+    project {
+        jdkName '1.7'
+        languageLevel '1.7'
+    }
+    module {
+        inheritOutputDirs = false
+        outputDir = compileJava.destinationDir
+        testOutputDir = compileTestJava.destinationDir
+
+    }
+}
+
+configurations.compile.transitive = true
+configurations.provided.transitive = false
+configurations.optional.transitive = false
 
 //======================================================================
 // DEPENDENCIES
 //======================================================================
 
 dependencies {
-
-    compile group:"commons-lang", name:"commons-lang", version:"2.4"
+    compile 'commons-lang:commons-lang:2.4'
+    compile 'org.codehaus.groovy:groovy-all:2.3.0'
 
     // spring
-    compile "org.springframework:spring-core:4.0.5.RELEASE"
-    compile "org.springframework:spring-context:4.0.5.RELEASE"
-    compile "org.springframework:spring-beans:4.0.5.RELEASE"
+    provided 'org.springframework:spring-core:4.0.5.RELEASE'
+    provided 'org.springframework:spring-context:4.0.5.RELEASE'
+    provided 'org.springframework:spring-beans:4.0.5.RELEASE'
 
     // ratpack
-    compile 'io.ratpack:ratpack-rx:0.9.6'
-    compile 'io.ratpack:ratpack-jackson:0.9.6'
-    //springloaded "org.springsource.springloaded:springloaded-core:1.1.4"
-    testCompile "org.spockframework:spock-core:0.7-groovy-2.0", {
-        exclude module: "groovy-all"
+    provided 'io.ratpack:ratpack-rx:0.9.6'
+    provided 'io.ratpack:ratpack-jackson:0.9.6'
+    //springloaded 'org.springsource.springloaded:springloaded-core:1.1.4'
+    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0', {
+        exclude module: 'groovy-all'
     }
 
     // logging
-    compile "org.slf4j:slf4j-api:1.7.5"
-    compile "org.slf4j:slf4j-log4j12:1.7.5"
+    compile 'org.slf4j:slf4j-api:1.7.5'
+    provided 'org.slf4j:slf4j-log4j12:1.7.5'
 
     // http clients
     compile 'com.ning:async-http-client:1.8.11', {
@@ -104,7 +127,6 @@ dependencies {
         exclude group: 'org.apache.httpcomponents'
     }
 }
-
 
 //======================================================================
 // TASKS
