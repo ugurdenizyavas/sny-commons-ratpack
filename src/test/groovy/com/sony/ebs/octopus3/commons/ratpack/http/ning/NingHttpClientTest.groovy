@@ -6,13 +6,14 @@ import org.apache.commons.lang.math.RandomUtils
 import org.junit.*
 import ratpack.exec.ExecController
 import ratpack.launch.LaunchConfigBuilder
+import spock.util.concurrent.BlockingVariable
 
 import static com.github.dreamhead.moco.Moco.*
 
 @Slf4j
-class NingHttpClientIntegrationTest {
+class NingHttpClientTest {
 
-    ExecController execController
+    static ExecController execController
     NingHttpClient ningHttpClient
 
     static Runner runner
@@ -25,41 +26,43 @@ class NingHttpClientIntegrationTest {
 
         runner = Runner.runner(server)
         runner.start()
-        serverUrl = "http://localhost:${server.port()}/test1"
+        serverUrl = "http://localhost:${server.port()}"
+
+        execController = LaunchConfigBuilder.noBaseDir().build().execController
     }
 
     @AfterClass
     static void tearDownOnce() {
+        if (execController) execController.close()
         runner.stop()
     }
 
     @Before
     void before() {
-        execController = LaunchConfigBuilder.noBaseDir().build().execController
         ningHttpClient = new NingHttpClient(execController.control)
     }
 
-    @After
-    void after() {
-        if (execController) execController.close()
+    void runFlow(String url, String expected) {
+        def result = new BlockingVariable<String>(5)
+        execController.start {
+            ningHttpClient.doGet(url)
+                    .doOnError({
+                result.set("error")
+            }).subscribe({
+                result.set(it)
+            })
+        }
+        assert result.get() == expected
     }
 
     @Test
     void "test get"() {
-        def finished = new Object()
-        def result
-        execController.start {
-            ningHttpClient.doGet(serverUrl).subscribe { String res ->
-                synchronized (finished) {
-                    result = res
-                    finished.notifyAll()
-                }
-            }
-        }
-        synchronized (finished) {
-            finished.wait 5000
-        }
-        assert result == "xxx"
+        runFlow(serverUrl + "/test1", "xxx")
+    }
+
+    @Test
+    void "test error"() {
+        runFlow(serverUrl + "/test2", "error")
     }
 
 }
