@@ -82,7 +82,7 @@ class NingHttpClient {
 
     rx.Observable<String> executeRequestObservable(RequestType requestType, String url, String data = null)
             throws Exception {
-        observe(execControl.blocking({
+        //observe(execControl.blocking({
             rx.Observable.from(executeRequest(requestType, url, data)).map({ response ->
                 if (response.statusCode < 200 || response.statusCode > 299) {
                     def message = "error getting $response.uri with http status code $response.statusCode"
@@ -91,8 +91,8 @@ class NingHttpClient {
                 }
                 log.info "finished getting $response.uri with http status code $response.statusCode"
                 response.responseBody
-            }).toBlocking().single()
-        }))
+            })
+        //}))
     }
 
     rx.Observable<String> doGet(String url) throws Exception {
