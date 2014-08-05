@@ -30,7 +30,8 @@ class NingHttpClient {
 
     public NingHttpClient(LaunchConfig launchConfig, String proxyHost, int proxyPort,
                           String proxyUser, String proxyPassword, String nonProxyHosts,
-                          String authenticationUser, String authenticationPassword) {
+                          String authenticationUser, String authenticationPassword,
+                          int connectionTimeout, int readTimeout) {
         AsyncHttpClientConfig config
         if (proxyHost) {
             def proxyServer = new ProxyServer(proxyHost, proxyPort, proxyUser, proxyPassword)
@@ -41,13 +42,13 @@ class NingHttpClient {
             }
             config = new AsyncHttpClientConfig.Builder()
                     .setProxyServer(proxyServer)
-                    .setConnectionTimeoutInMs(2000)
-                    .setRequestTimeoutInMs(10000)
+                    .setConnectionTimeoutInMs(connectionTimeout)
+                    .setRequestTimeoutInMs(readTimeout)
                     .build()
         } else {
             config = new AsyncHttpClientConfig.Builder()
-                    .setConnectionTimeoutInMs(2000)
-                    .setRequestTimeoutInMs(10000)
+                    .setConnectionTimeoutInMs(connectionTimeout)
+                    .setRequestTimeoutInMs(readTimeout)
                     .build()
         }
         asyncHttpClient = new AsyncHttpClient(config)
@@ -90,19 +91,6 @@ class NingHttpClient {
         return response.statusCode >= 200 && response.statusCode < 300
     }
 
-    rx.Observable<String> getResultAsString(RequestType requestType, String url, String data = null)
-            throws Exception {
-        rx.Observable.from(executeRequest(requestType, url, data), Schedulers.io()).map({ response ->
-            if (!NingHttpClient.isSuccess(response)) {
-                def message = "error getting $response.uri with http status code $response.statusCode"
-                log.error message
-                throw new Exception(message)
-            }
-            log.info "finished getting $response.uri with http status code $response.statusCode"
-            response.responseBody
-        }).observeOn(ratpackScheduler)
-    }
-
     rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)
             throws Exception {
         rx.Observable.from(executeRequest(requestType, url, data), Schedulers.io()).observeOn(ratpackScheduler)
@@ -112,16 +100,12 @@ class NingHttpClient {
         getResultAsResponse(RequestType.GET, url)
     }
 
-    rx.Observable<String> doGetAsString(String url) throws Exception {
-        getResultAsString(RequestType.GET, url)
+    rx.Observable<Response> doPost(String url, String data) throws Exception {
+        getResultAsResponse(RequestType.POST, url, data)
     }
 
-    rx.Observable<String> doPost(String url, String data) throws Exception {
-        getResultAsString(RequestType.POST, url, data)
-    }
-
-    rx.Observable<String> doDelete(String url) throws Exception {
-        getResultAsString(RequestType.DELETE, url)
+    rx.Observable<Response> doDelete(String url) throws Exception {
+        getResultAsResponse(RequestType.DELETE, url)
     }
 
 }
