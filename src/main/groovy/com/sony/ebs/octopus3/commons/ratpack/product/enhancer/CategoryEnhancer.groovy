@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.enhancer
 
+import com.ning.http.client.Response
 import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
 import groovy.util.logging.Slf4j
 import ratpack.exec.ExecControl
@@ -28,9 +29,11 @@ class CategoryEnhancer implements ProductEnhancer {
             def categoryReadUrl = categoryServiceUrl.replace(":publication", obj.publication).replace(":locale", obj.locale)
             log.info "category service url for $categoryReadUrl"
             httpClient.doGet(categoryReadUrl)
-        }).flatMap({ String feed ->
+        }).filter({ Response response ->
+            NingHttpClient.isSuccess(response)
+        }).flatMap({ Response response ->
             observe(execControl.blocking {
-                obj.category = parseFeed(obj.sku, feed)
+                obj.category = parseFeed(obj.sku, response.responseBody)
                 obj
             })
         })

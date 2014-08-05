@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.enhancer
 
+import com.ning.http.client.Response
 import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
 import groovy.util.logging.Slf4j
 import ratpack.exec.ExecControl
@@ -30,9 +31,11 @@ class EanCodeEnhancer implements ProductEnhancer {
         log.info "ean code service url for $sku is $url"
         rx.Observable.from("starting").flatMap({
             httpClient.doGet(url)
-        }).flatMap({ String feed ->
+        }).filter({ Response response ->
+            NingHttpClient.isSuccess(response)
+        }).flatMap({ Response response ->
             observe(execControl.blocking {
-                obj.eanCode = parseFeed(sku, feed)
+                obj.eanCode = parseFeed(sku, response.responseBody)
                 obj
             })
         })

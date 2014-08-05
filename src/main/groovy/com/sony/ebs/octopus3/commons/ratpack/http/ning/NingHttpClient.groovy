@@ -5,11 +5,13 @@ import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder
 import com.ning.http.client.AsyncHttpClientConfig
 import com.ning.http.client.ProxyServer
 import com.ning.http.client.Realm
+import com.ning.http.client.Response
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
-import ratpack.exec.ExecControl
-
-import static ratpack.rx.RxRatpack.observe
+import ratpack.launch.LaunchConfig
+import ratpack.rx.internal.ExecControllerBackedScheduler
+import rx.Scheduler
+import rx.schedulers.Schedulers
 
 @Slf4j
 class NingHttpClient {
@@ -18,14 +20,15 @@ class NingHttpClient {
         GET, POST, DELETE
     }
 
-    ExecControl execControl
+    LaunchConfig launchConfig
     String authenticationUser, authenticationPassword
     AsyncHttpClient asyncHttpClient
+    Scheduler ratpackScheduler
 
     public NingHttpClient() {
     }
 
-    public NingHttpClient(ExecControl execControl, String proxyHost, int proxyPort,
+    public NingHttpClient(LaunchConfig launchConfig, String proxyHost, int proxyPort,
                           String proxyUser, String proxyPassword, String nonProxyHosts,
                           String authenticationUser, String authenticationPassword) {
         AsyncHttpClientConfig config
@@ -49,14 +52,17 @@ class NingHttpClient {
         }
         asyncHttpClient = new AsyncHttpClient(config)
 
-        this.execControl = execControl
+        this.launchConfig = launchConfig
         this.authenticationUser = authenticationUser
         this.authenticationPassword = authenticationPassword
+
+        ratpackScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
-    public NingHttpClient(ExecControl execControl) {
+    public NingHttpClient(LaunchConfig launchConfig) {
         asyncHttpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder().build())
-        this.execControl = execControl
+        this.launchConfig = launchConfig
+        ratpackScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
     private def executeRequest(RequestType requestType, String urlString, String data = null) {
@@ -80,31 +86,42 @@ class NingHttpClient {
         requestBuilder.execute()
     }
 
-    rx.Observable<String> executeRequestObservable(RequestType requestType, String url, String data = null)
-            throws Exception {
-        //observe(execControl.blocking({
-            rx.Observable.from(executeRequest(requestType, url, data)).map({ response ->
-                if (response.statusCode < 200 || response.statusCode > 299) {
-                    def message = "error getting $response.uri with http status code $response.statusCode"
-                    log.error message
-                    throw new Exception(message)
-                }
-                log.info "finished getting $response.uri with http status code $response.statusCode"
-                response.responseBody
-            })
-        //}))
+    public static boolean isSuccess(Response response) {
+        return response.statusCode >= 200 && response.statusCode < 300
     }
 
-    rx.Observable<String> doGet(String url) throws Exception {
-        executeRequestObservable(RequestType.GET, url)
+    rx.Observable<String> getResultAsString(RequestType requestType, String url, String data = null)
+            throws Exception {
+        rx.Observable.from(executeRequest(requestType, url, data), Schedulers.io()).map({ response ->
+            if (!NingHttpClient.isSuccess(response)) {
+                def message = "error getting $response.uri with http status code $response.statusCode"
+                log.error message
+                throw new Exception(message)
+            }
+            log.info "finished getting $response.uri with http status code $response.statusCode"
+            response.responseBody
+        }).observeOn(ratpackScheduler)
+    }
+
+    rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)
+            throws Exception {
+        rx.Observable.from(executeRequest(requestType, url, data), Schedulers.io()).observeOn(ratpackScheduler)
+    }
+
+    rx.Observable<Response> doGet(String url) throws Exception {
+        getResultAsResponse(RequestType.GET, url)
+    }
+
+    rx.Observable<String> doGetAsString(String url) throws Exception {
+        getResultAsString(RequestType.GET, url)
     }
 
     rx.Observable<String> doPost(String url, String data) throws Exception {
-        executeRequestObservable(RequestType.POST, url, data)
+        getResultAsString(RequestType.POST, url, data)
     }
 
     rx.Observable<String> doDelete(String url) throws Exception {
-        executeRequestObservable(RequestType.DELETE, url)
+        getResultAsString(RequestType.DELETE, url)
     }
 
 }
