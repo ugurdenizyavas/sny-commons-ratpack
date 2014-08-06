@@ -23,7 +23,7 @@ class NingHttpClient {
     LaunchConfig launchConfig
     String authenticationUser, authenticationPassword
     AsyncHttpClient asyncHttpClient
-    Scheduler ratpackScheduler
+    Scheduler resumingScheduler, httpExecutionScheduler
 
     public NingHttpClient() {
     }
@@ -53,17 +53,22 @@ class NingHttpClient {
         }
         asyncHttpClient = new AsyncHttpClient(config)
 
-        this.launchConfig = launchConfig
         this.authenticationUser = authenticationUser
         this.authenticationPassword = authenticationPassword
 
-        ratpackScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
+        this.launchConfig = launchConfig
+
+        //httpExecutionScheduler = Schedulers.from(launchConfig.execController.blockingExecutor)
+        httpExecutionScheduler = Schedulers.io()
+        resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
     public NingHttpClient(LaunchConfig launchConfig) {
         asyncHttpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder().build())
         this.launchConfig = launchConfig
-        ratpackScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
+
+        httpExecutionScheduler = Schedulers.io()
+        resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
     private def executeRequest(RequestType requestType, String urlString, String data = null) {
@@ -93,7 +98,7 @@ class NingHttpClient {
 
     rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)
             throws Exception {
-        rx.Observable.from(executeRequest(requestType, url, data), Schedulers.io()).observeOn(ratpackScheduler)
+        rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler).observeOn(resumingScheduler)
     }
 
     rx.Observable<Response> doGet(String url) throws Exception {
