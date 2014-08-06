@@ -17,10 +17,10 @@ class EanCodeEnhancer implements ProductEnhancer {
     ExecControl execControl
 
     private String parseFeed(String sku, String feed) {
-        log.info "parsing eanCode xml"
+        log.debug "parsing eanCode xml"
         def xml = new XmlSlurper().parseText(feed)
         def eanCode = xml.eancode?.@code?.toString() ?: null
-        log.info "ean code for $sku is $eanCode"
+        log.debug "ean code for $sku is $eanCode"
         eanCode
     }
 
@@ -28,7 +28,7 @@ class EanCodeEnhancer implements ProductEnhancer {
     public <T> rx.Observable<T> enhance(T obj) throws Exception {
         String sku = obj.sku.toUpperCase(Locale.US)
         def url = serviceUrl.replace(":product", sku)
-        log.info "ean code service url for $sku is $url"
+        log.debug "ean code service url for $sku is $url"
         rx.Observable.from("starting").flatMap({
             httpClient.doGet(url)
         }).filter({ Response response ->
