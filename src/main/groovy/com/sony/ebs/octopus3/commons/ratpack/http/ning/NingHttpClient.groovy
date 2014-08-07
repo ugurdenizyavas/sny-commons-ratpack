@@ -58,8 +58,8 @@ class NingHttpClient {
 
         this.launchConfig = launchConfig
 
-        //httpExecutionScheduler = Schedulers.from(launchConfig.execController.blockingExecutor)
-        httpExecutionScheduler = Schedulers.io()
+        httpExecutionScheduler = Schedulers.from(launchConfig.execController.blockingExecutor)
+        //httpExecutionScheduler = Schedulers.io()
         resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
@@ -67,7 +67,8 @@ class NingHttpClient {
         asyncHttpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder().build())
         this.launchConfig = launchConfig
 
-        httpExecutionScheduler = Schedulers.io()
+        httpExecutionScheduler = Schedulers.from(launchConfig.execController.blockingExecutor)
+        //httpExecutionScheduler = Schedulers.io()
         resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
