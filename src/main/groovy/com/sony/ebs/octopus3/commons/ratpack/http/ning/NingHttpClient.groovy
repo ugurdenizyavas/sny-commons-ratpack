@@ -98,7 +98,11 @@ class NingHttpClient {
 
     rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)
             throws Exception {
-        rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler).observeOn(resumingScheduler)
+        rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler)
+                .map({ Response response ->
+            log.info "HTTP $response.statusCode returned for $requestType for $url"
+            response
+        }).observeOn(resumingScheduler)
     }
 
     rx.Observable<Response> doGet(String url) throws Exception {
