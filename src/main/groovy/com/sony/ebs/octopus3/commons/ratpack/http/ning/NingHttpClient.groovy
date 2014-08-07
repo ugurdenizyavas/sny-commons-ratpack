@@ -75,7 +75,7 @@ class NingHttpClient {
     private def executeRequest(RequestType requestType, String urlString, String data = null) {
         def url = new URIBuilder(urlString).toString()
 
-        log.info "starting $requestType for $url"
+        log.info "starting $requestType $url"
 
         Realm realm = authenticationUser ? (new Realm.RealmBuilder()).setScheme(Realm.AuthScheme.BASIC).setPrincipal(authenticationUser).setPassword(authenticationPassword).build() : null
 
@@ -101,7 +101,7 @@ class NingHttpClient {
             throws Exception {
         rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler)
                 .map({ Response response ->
-            log.info "HTTP $response.statusCode returned for $requestType for $url"
+            log.info "HTTP $response.statusCode $requestType $url"
             response
         }).observeOn(resumingScheduler)
     }
