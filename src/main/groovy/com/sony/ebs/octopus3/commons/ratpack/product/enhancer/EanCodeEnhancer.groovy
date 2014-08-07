@@ -16,7 +16,7 @@ class EanCodeEnhancer implements ProductEnhancer {
 
     ExecControl execControl
 
-    private String parseFeed(String sku, String feed) {
+    public static String parseFeed(String sku, String feed) {
         def xml = new XmlSlurper().parseText(feed)
         def eanCode = xml.eancode?.@code?.toString() ?: null
         log.trace "ean code for $sku is $eanCode"
