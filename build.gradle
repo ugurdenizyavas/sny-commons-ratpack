@@ -92,7 +92,6 @@ configurations.optional.transitive = false
 
 dependencies {
     compile 'commons-lang:commons-lang:2.4'
-    compile 'org.codehaus.groovy:groovy-all:2.3.0'
 
     // spring
     provided 'org.springframework:spring-core:4.0.5.RELEASE'
