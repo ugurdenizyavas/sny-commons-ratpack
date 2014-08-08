@@ -93,6 +93,8 @@ configurations.optional.transitive = false
 dependencies {
     compile 'commons-lang:commons-lang:2.4'
 
+    compile 'com.sony.ebs.octopus3:octopus3-commons:1.1-SNAPSHOT'
+
     // spring
     provided 'org.springframework:spring-core:4.0.5.RELEASE'
     provided 'org.springframework:spring-context:4.0.5.RELEASE'
