@@ -18,7 +18,7 @@ class EanCodeEnhancer implements ProductEnhancer {
 
     public static String parseFeed(String sku, String feed) {
         def xml = new XmlSlurper().parseText(feed)
-        def eanCode = xml.eancode?.@code?.toString() ?: null
+        def eanCode = xml.eancode?.@code?.toString()
         log.trace "ean code for $sku is $eanCode"
         eanCode
     }
@@ -27,13 +27,13 @@ class EanCodeEnhancer implements ProductEnhancer {
     public <T> rx.Observable<T> enhance(T obj) throws Exception {
         String sku = obj.sku.toUpperCase(Locale.US)
         def url = serviceUrl.replace(":product", sku)
-        log.trace "ean code service url for $sku is $url"
+        log.trace "ean code service url for {} is {}", sku, url
         rx.Observable.from("starting").flatMap({
             httpClient.doGet(url)
         }).filter({ Response response ->
             boolean success = NingHttpClient.isSuccess(response)
             if (!success) {
-                log.debug "$sku eliminated by eanCode not found in Octopus"
+                log.debug "{} eliminated by eanCode not found in Octopus", sku
             }
             success
         }).flatMap({ Response response ->
@@ -42,7 +42,7 @@ class EanCodeEnhancer implements ProductEnhancer {
                 if (eanCode) {
                     obj.eanCode = eanCode
                 } else {
-                    log.debug "$sku eliminated by eanCode not found in xml"
+                    log.debug "{} eliminated by eanCode not found in xml", sku
                 }
                 obj
             })
