@@ -12,10 +12,10 @@ import static ratpack.rx.RxRatpack.observe
 @Slf4j
 class FileAttributesProvider {
 
+    final JsonSlurper jsonSlurper = new JsonSlurper()
+
     ExecControl execControl
-
     String repositoryFileAttributesServiceUrl
-
     NingHttpClient httpClient
 
     rx.Observable<FileAttribute> getLastModifiedTime(URN urn) {
@@ -25,8 +25,8 @@ class FileAttributesProvider {
         }).flatMap({ Response response ->
             if (NingHttpClient.isSuccess(response)) {
                 observe(execControl.blocking {
-                    def json = new JsonSlurper().parseText(response.responseBody)
-                    def lastModifiedTime = json.result.lastModifiedTime
+                    def json = jsonSlurper.parseText(response.responseBody)
+                    def lastModifiedTime = json.result?.lastModifiedTime
                     log.info "lastModifiedTime for $urn is $lastModifiedTime"
                     return new FileAttribute(found: true, value: lastModifiedTime)
                 })
