@@ -54,6 +54,9 @@ apply plugin: 'propdeps-idea'
 // CONFIGURATIONS
 //======================================================================
 
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+
 configurations {
     all {
         exclude module: 'groovy'
