@@ -16,7 +16,7 @@ class CategoryEnhancerTest {
     }
 
     def getFeed = {
-        defaultResourceLoader.getResource("classpath:com/sony/ebs/octopus3/commons/ratpack/product/enhancer/category.xml")?.file?.text
+        defaultResourceLoader.getResource("classpath:com/sony/ebs/octopus3/commons/ratpack/product/enhancer/category.xml")?.inputStream
     }
 
     @Test
