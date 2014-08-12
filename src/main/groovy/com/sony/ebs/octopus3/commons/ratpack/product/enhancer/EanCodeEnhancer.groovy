@@ -16,8 +16,8 @@ class EanCodeEnhancer implements ProductEnhancer {
 
     ExecControl execControl
 
-    public static String parseFeed(String sku, String feed) {
-        def xml = new XmlSlurper().parseText(feed)
+    public static String parseFeed(String sku, InputStream feed) {
+        def xml = new XmlSlurper().parse(feed)
         def eanCode = xml.eancode?.@code?.toString()
         log.trace "ean code for $sku is $eanCode"
         eanCode
@@ -38,7 +38,7 @@ class EanCodeEnhancer implements ProductEnhancer {
             success
         }).flatMap({ Response response ->
             observe(execControl.blocking {
-                def eanCode = parseFeed(sku, response.responseBody)
+                def eanCode = parseFeed(sku, response.responseBodyAsStream)
                 if (eanCode) {
                     obj.eanCode = eanCode
                 } else {
