@@ -16,6 +16,7 @@ class FileAttributesProvider {
 
     ExecControl execControl
     String repositoryFileAttributesServiceUrl
+    String repositoryFileSaveUrl
     NingHttpClient httpClient
 
     rx.Observable<FileAttribute> getLastModifiedTime(URN urn) {
@@ -37,7 +38,7 @@ class FileAttributesProvider {
     }
 
     rx.Observable<Boolean> updateLastModifiedTime(URN urn) {
-        httpClient.doPost(repositoryFileAttributesServiceUrl.replace(":urn", urn.toString()), "update").map({ response ->
+        httpClient.doPost(repositoryFileSaveUrl.replace(":urn", urn.toString()), "update").map({ response ->
             NingHttpClient.isSuccess(response)
         })
     }
