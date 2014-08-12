@@ -56,7 +56,7 @@ class FileAttributesProviderTest {
     def runGetLastModifiedTime() {
         deltaDatesProvider.httpClient = mockNingHttpClient.proxyInstance()
 
-        def result = new BlockingVariable<String>(5)
+        def result = new BlockingVariable(5)
         boolean valueSet = false
         execController.start {
             deltaDatesProvider.getLastModifiedTime(new URNImpl("urn:test:a")).subscribe({
@@ -73,7 +73,7 @@ class FileAttributesProviderTest {
     }
 
     @Test
-    void "get LastModifiedTime"() {
+    void "getLastModifiedTime found"() {
         mockNingHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/repository/fileattributes/urn:test:a"
@@ -81,22 +81,31 @@ class FileAttributesProviderTest {
             }
         }
 
-        def lmt = runGetLastModifiedTime()
-        assert lmt.found ==  true
-        assert lmt.value ==  "2014-08-08T08:18:27.000+02:00"
+        def result = (FileAttribute) runGetLastModifiedTime()
+        assert result.found == true
+        assert result.value == "2014-08-08T08:18:27.000+02:00"
     }
 
     @Test
-    void "create date params sdate not found and edate"() {
+    void "getLastModifiedTime not found"() {
         mockNingHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/repository/fileattributes/urn:test:a"
                 rx.Observable.just(new MockNingResponse(_statusCode: 404))
             }
         }
-        def lmt = runGetLastModifiedTime()
-        assert lmt.found ==  false
-        assert lmt.value ==  null
+        def result = (FileAttribute) runGetLastModifiedTime()
+        assert result.found == false
+        assert result.value == null
     }
 
+    @Test
+    void "getLastModifiedTime error"() {
+        mockNingHttpClient.demand.with {
+            doGet(1) { String url ->
+                throw new Exception("error getLastModifiedTime")
+            }
+        }
+        assert runGetLastModifiedTime() == "error"
+    }
 }
