@@ -22,10 +22,24 @@ class CategoryEnhancer implements ProductEnhancer {
         result?.parent()?.parent()?.name?.text()
     }
 
+    String generateUrl(String publication, String locale) {
+        String properPublication = publication.toUpperCase(Locale.US)
+
+        def localeParts = locale.split('_')
+        localeParts[1] = localeParts[1].toUpperCase(Locale.US)
+        String properLocale = localeParts.join('_')
+
+        categoryServiceUrl.replace(
+                ":publication", properPublication
+        ).replace(
+                ":locale", properLocale
+        )
+    }
+
     @Override
     public <T> rx.Observable<T> enhance(T obj) throws Exception {
         rx.Observable.from("starting").flatMap({
-            def categoryReadUrl = categoryServiceUrl.replace(":publication", obj.publication).replace(":locale", obj.locale)
+            def categoryReadUrl = generateUrl(obj.publication, obj.locale)
             log.info "category service url for $categoryReadUrl"
             httpClient.doGet(categoryReadUrl)
         }).filter({ Response response ->
