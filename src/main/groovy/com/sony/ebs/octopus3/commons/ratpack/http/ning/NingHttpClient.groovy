@@ -97,6 +97,16 @@ class NingHttpClient {
         return response?.statusCode >= 200 && response?.statusCode < 300
     }
 
+    public static boolean isSuccess(Response response, String message) {
+        boolean success = isSuccess(response)
+        if (success) {
+                log.info "HTTP $response.statusCode - SUCCES IN $message for $response.uri"
+        } else {
+                log.error "HTTP $response.statusCode - FAILURE IN $message, quiting, for $response.uri"
+        }
+        return success
+    }
+
     rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)
             throws Exception {
         rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler)

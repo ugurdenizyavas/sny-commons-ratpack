@@ -30,7 +30,7 @@ class CategoryEnhancer implements ProductEnhancer {
             log.info "category service url for $categoryReadUrl"
             httpClient.doGet(categoryReadUrl)
         }).filter({ Response response ->
-            NingHttpClient.isSuccess(response)
+            NingHttpClient.isSuccess(response, "getting octopus category feed")
         }).flatMap({ Response response ->
             observe(execControl.blocking {
                 obj.category = parseFeed(obj.sku, response.responseBody)

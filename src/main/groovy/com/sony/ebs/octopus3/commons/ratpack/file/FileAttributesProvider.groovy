@@ -24,7 +24,7 @@ class FileAttributesProvider {
             def url = repositoryFileAttributesServiceUrl.replace(":urn", urn.toString())
             httpClient.doGet(url)
         }).flatMap({ Response response ->
-            if (NingHttpClient.isSuccess(response)) {
+            if (NingHttpClient.isSuccess(response, "getting file attributes")) {
                 observe(execControl.blocking {
                     def json = jsonSlurper.parseText(response.responseBody)
                     def lastModifiedTime = json.result?.lastModifiedTime
