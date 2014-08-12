@@ -94,7 +94,7 @@ class NingHttpClient {
     }
 
     public static boolean isSuccess(Response response) {
-        return response.statusCode >= 200 && response.statusCode < 300
+        return response?.statusCode >= 200 && response?.statusCode < 300
     }
 
     rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)

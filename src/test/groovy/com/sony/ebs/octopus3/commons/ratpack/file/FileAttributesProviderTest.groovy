@@ -20,8 +20,8 @@ class FileAttributesProviderTest {
 {
     "status": 200,
     "result": {
-        "lastModifiedTime": "2014-08-08T08:18:27.000+02:00",
-        "lastAccessTime": "2014-08-07T07:45:57.000+02:00",
+        "lastModifiedTime": "t1",
+        "lastAccessTime": "t2",
         "creationTime": "2014-08-08T08:18:27.000+02:00",
         "regularFile": false,
         "directory": true,
@@ -56,7 +56,7 @@ class FileAttributesProviderTest {
     def runGetLastModifiedTime() {
         deltaDatesProvider.httpClient = mockNingHttpClient.proxyInstance()
 
-        def result = new BlockingVariable<String>(5)
+        def result = new BlockingVariable(5)
         boolean valueSet = false
         execController.start {
             deltaDatesProvider.getLastModifiedTime(new URNImpl("urn:test:a")).subscribe({
@@ -73,30 +73,34 @@ class FileAttributesProviderTest {
     }
 
     @Test
-    void "get LastModifiedTime"() {
+    void "getLastModifiedTime found"() {
         mockNingHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/repository/fileattributes/urn:test:a"
                 rx.Observable.just(new MockNingResponse(_statusCode: 200, _responseBody: FILE_ATTR_FEED))
             }
         }
-
-        def lmt = runGetLastModifiedTime()
-        assert lmt.found ==  true
-        assert lmt.value ==  "2014-08-08T08:18:27.000+02:00"
+        runGetLastModifiedTime() == new FileAttribute(found: true, value: "t1")
     }
 
     @Test
-    void "create date params sdate not found and edate"() {
+    void "getLastModifiedTime not found"() {
         mockNingHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/repository/fileattributes/urn:test:a"
                 rx.Observable.just(new MockNingResponse(_statusCode: 404))
             }
         }
-        def lmt = runGetLastModifiedTime()
-        assert lmt.found ==  false
-        assert lmt.value ==  null
+        runGetLastModifiedTime() == new FileAttribute(found: false)
     }
 
+    @Test
+    void "getLastModifiedTime error"() {
+        mockNingHttpClient.demand.with {
+            doGet(1) { String url ->
+                throw new Exception("error getLastModifiedTime")
+            }
+        }
+        assert runGetLastModifiedTime() == "error"
+    }
 }
