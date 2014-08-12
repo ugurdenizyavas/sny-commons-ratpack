@@ -31,7 +31,7 @@ class EanCodeEnhancer implements ProductEnhancer {
         rx.Observable.from("starting").flatMap({
             httpClient.doGet(url)
         }).filter({ Response response ->
-            boolean success = NingHttpClient.isSuccess(response)
+            boolean success = NingHttpClient.isSuccess(response, "getting ean code")
             if (!success) {
                 log.debug "{} eliminated by eanCode not found in Octopus", sku
             }
