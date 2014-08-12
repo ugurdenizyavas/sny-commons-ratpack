@@ -20,8 +20,8 @@ class FileAttributesProviderTest {
 {
     "status": 200,
     "result": {
-        "lastModifiedTime": "2014-08-08T08:18:27.000+02:00",
-        "lastAccessTime": "2014-08-07T07:45:57.000+02:00",
+        "lastModifiedTime": "t1",
+        "lastAccessTime": "t2",
         "creationTime": "2014-08-08T08:18:27.000+02:00",
         "regularFile": false,
         "directory": true,
@@ -80,10 +80,7 @@ class FileAttributesProviderTest {
                 rx.Observable.just(new MockNingResponse(_statusCode: 200, _responseBody: FILE_ATTR_FEED))
             }
         }
-
-        def result = (FileAttribute) runGetLastModifiedTime()
-        assert result.found == true
-        assert result.value == "2014-08-08T08:18:27.000+02:00"
+        runGetLastModifiedTime() == new FileAttribute(found: true, value: "t1")
     }
 
     @Test
@@ -94,9 +91,7 @@ class FileAttributesProviderTest {
                 rx.Observable.just(new MockNingResponse(_statusCode: 404))
             }
         }
-        def result = (FileAttribute) runGetLastModifiedTime()
-        assert result.found == false
-        assert result.value == null
+        runGetLastModifiedTime() == new FileAttribute(found: false)
     }
 
     @Test
