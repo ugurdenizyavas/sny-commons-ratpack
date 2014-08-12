@@ -18,7 +18,7 @@ class CategoryEnhancer implements ProductEnhancer {
 
     static String parseFeed(String sku, InputStream feed) {
         def xml = new XmlSlurper().parse(feed)
-        def result = xml.depthFirst().find { it.name() == 'product' && it.text() == sku }
+        def result = xml.depthFirst().find { 'product'.equalsIgnoreCase(it.name()) && sku.equalsIgnoreCase(it.text()) }
         result?.parent()?.parent()?.name?.text()
     }
 
