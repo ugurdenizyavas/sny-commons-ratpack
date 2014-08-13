@@ -30,22 +30,22 @@ class EanCodeEnhancer implements ProductEnhancer {
         log.trace "ean code service url for {} is {}", sku, url
         rx.Observable.from("starting").flatMap({
             httpClient.doGet(url)
-        }).filter({ Response response ->
-            boolean success = NingHttpClient.isSuccess(response, "getting ean code")
-            if (!success) {
-                log.debug "{} eliminated by eanCode not found in Octopus", sku
-            }
-            success
         }).flatMap({ Response response ->
-            observe(execControl.blocking {
-                def eanCode = parseFeed(sku, response.responseBodyAsStream)
-                if (eanCode) {
-                    obj.eanCode = eanCode
-                } else {
-                    log.debug "{} eliminated by eanCode not found in xml", sku
-                }
-                obj
-            })
+            boolean found = NingHttpClient.isSuccess(response, "getting ean code")
+            if (!found) {
+                log.debug "{} eliminated by eanCode not found in Octopus", sku
+                rx.Observable.just(obj)
+            } else {
+                observe(execControl.blocking {
+                    def eanCode = parseFeed(sku, response.responseBodyAsStream)
+                    if (eanCode) {
+                        obj.eanCode = eanCode
+                    } else {
+                        log.debug "{} eliminated by eanCode not found in xml", sku
+                    }
+                    obj
+                })
+            }
         })
     }
 }

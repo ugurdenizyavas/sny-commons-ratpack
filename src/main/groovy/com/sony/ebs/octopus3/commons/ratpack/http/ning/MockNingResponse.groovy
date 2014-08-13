@@ -33,7 +33,7 @@ class MockNingResponse implements Response{
 
     @Override
     InputStream getResponseBodyAsStream() throws IOException {
-        return null
+        return new ByteArrayInputStream(_responseBody?.getBytes("UTF-8"))
     }
 
     @Override
