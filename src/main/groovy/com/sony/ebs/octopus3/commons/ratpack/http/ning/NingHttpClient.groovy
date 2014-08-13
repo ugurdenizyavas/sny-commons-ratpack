@@ -107,6 +107,14 @@ class NingHttpClient {
         return success
     }
 
+    public static boolean isSuccess(Response response, String message, List errors) {
+        boolean success = isSuccess(response)
+        if (!success) {
+            errors << "HTTP $response.statusCode error $message"
+        }
+        return success
+    }
+
     rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)
             throws Exception {
         rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler)
