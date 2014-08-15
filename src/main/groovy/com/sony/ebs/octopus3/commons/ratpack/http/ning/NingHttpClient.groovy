@@ -72,7 +72,7 @@ class NingHttpClient {
         resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
-    private def executeRequest(RequestType requestType, String urlString, String data = null) {
+    private def executeRequest(RequestType requestType, String urlString, data) {
         def url = new URIBuilder(urlString).toString()
 
         log.info "starting $requestType $url"
@@ -115,7 +115,7 @@ class NingHttpClient {
         return success
     }
 
-    rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, String data = null)
+    rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, data)
             throws Exception {
         rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler)
                 .map({ Response response ->
@@ -125,15 +125,19 @@ class NingHttpClient {
     }
 
     rx.Observable<Response> doGet(String url) throws Exception {
-        getResultAsResponse(RequestType.GET, url)
+        getResultAsResponse(RequestType.GET, url, null)
     }
 
     rx.Observable<Response> doPost(String url, String data) throws Exception {
         getResultAsResponse(RequestType.POST, url, data)
     }
 
+    rx.Observable<Response> doPost(String url, InputStream inputStream) throws Exception {
+        getResultAsResponse(RequestType.POST, url, inputStream)
+    }
+
     rx.Observable<Response> doDelete(String url) throws Exception {
-        getResultAsResponse(RequestType.DELETE, url)
+        getResultAsResponse(RequestType.DELETE, url, null)
     }
 
 }
