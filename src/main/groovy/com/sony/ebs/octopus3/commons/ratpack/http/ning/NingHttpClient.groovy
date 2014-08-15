@@ -110,7 +110,7 @@ class NingHttpClient {
     public static boolean isSuccess(Response response, String message, List errors) {
         boolean success = isSuccess(response)
         if (!success) {
-            errors << "HTTP $response.statusCode error $message"
+            errors << "HTTP $response.statusCode error $message".toString()
         }
         return success
     }
