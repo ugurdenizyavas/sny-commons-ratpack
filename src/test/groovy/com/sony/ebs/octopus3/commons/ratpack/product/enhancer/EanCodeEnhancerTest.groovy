@@ -19,8 +19,24 @@ class EanCodeEnhancerTest {
     StubFor mockNingHttpClient
     static ExecController execController
 
-    final static String FEED_WITH_EANCODE = '<eancodes><eancode material="a" code="4905524328974"/></eancodes>'
-    final static String FEED_NO_EANCODE = '<eancodes></eancodes>'
+    final static String FEED_WITH_EANCODE = '''
+<products>
+    <product>
+        <identifier type="display_name"><![CDATA[DSC-RX10]]></identifier>
+        <identifier type="catalogue_name"><![CDATA[DSC-RX10]]></identifier>
+        <identifier type="business_group"><![CDATA[DIM]]></identifier>
+        <identifier type="spider_business_group"><![CDATA[DIME]]></identifier>
+        <identifier type="sap_hierarchy"><![CDATA[SCPCDIMDSCCYBRCYBS]]></identifier>
+        <identifier type="eight_digit"><![CDATA[80814350]]></identifier>
+        <identifier type="material_name"><![CDATA[DSCRX10.CE3]]></identifier>
+        <identifier type="ean_code"><![CDATA[4905524328974]]></identifier>
+    </product>
+</products>
+'''
+    final static String FEED_NO_EANCODE = '''
+<products>
+</products>
+'''
 
     @BeforeClass
     static void beforeClass() {
