@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.http.ning
 
+import com.ning.http.client.AsyncCompletionHandlerBase
 import com.ning.http.client.AsyncHttpClient
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder
 import com.ning.http.client.AsyncHttpClientConfig
@@ -11,7 +12,8 @@ import org.apache.http.client.utils.URIBuilder
 import ratpack.launch.LaunchConfig
 import ratpack.rx.internal.ExecControllerBackedScheduler
 import rx.Scheduler
-import rx.schedulers.Schedulers
+
+import static ratpack.rx.RxRatpack.observe
 
 @Slf4j
 class NingHttpClient {
@@ -23,7 +25,7 @@ class NingHttpClient {
     LaunchConfig launchConfig
     String authenticationUser, authenticationPassword
     AsyncHttpClient asyncHttpClient
-    Scheduler resumingScheduler, httpExecutionScheduler
+    Scheduler resumingScheduler
 
     public NingHttpClient() {
     }
@@ -58,8 +60,6 @@ class NingHttpClient {
 
         this.launchConfig = launchConfig
 
-        httpExecutionScheduler = Schedulers.from(launchConfig.execController.blockingExecutor)
-        //httpExecutionScheduler = Schedulers.io()
         resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
@@ -67,12 +67,10 @@ class NingHttpClient {
         asyncHttpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder().build())
         this.launchConfig = launchConfig
 
-        httpExecutionScheduler = Schedulers.from(launchConfig.execController.blockingExecutor)
-        //httpExecutionScheduler = Schedulers.io()
         resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
-    private def executeRequest(RequestType requestType, String urlString, data) {
+    BoundRequestBuilder createRequestBuilder(RequestType requestType, String urlString, data) {
         def url = new URIBuilder(urlString).toString()
 
         log.info "starting $requestType $url"
@@ -90,37 +88,25 @@ class NingHttpClient {
                     .addHeader('Content-Type', 'multipart/form-data')
                     .setRealm(realm).setBody(data)
         }
-        requestBuilder.execute()
+        requestBuilder
     }
 
-    public static boolean isSuccess(Response response) {
-        return response?.statusCode >= 200 && response?.statusCode < 300
-    }
+    rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, data) {
+        observe(launchConfig.execController.control.promise { f ->
+            createRequestBuilder(requestType, url, data).execute(new AsyncCompletionHandlerBase() {
+                @Override
+                Response onCompleted(Response response) throws Exception {
+                    f.success(response)
+                    log.info "HTTP $response.statusCode $requestType $url"
+                    response
+                }
 
-    public static boolean isSuccess(Response response, String message) {
-        boolean success = isSuccess(response)
-        if (success) {
-                log.info "HTTP $response.statusCode - SUCCES IN $message for $response.uri"
-        } else {
-                log.error "HTTP $response.statusCode - FAILURE IN $message, quiting, for $response.uri"
-        }
-        return success
-    }
-
-    public static boolean isSuccess(Response response, String message, List errors) {
-        boolean success = isSuccess(response)
-        if (!success) {
-            errors << "HTTP $response.statusCode error $message".toString()
-        }
-        return success
-    }
-
-    rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, data)
-            throws Exception {
-        rx.Observable.from(executeRequest(requestType, url, data), httpExecutionScheduler)
-                .map({ Response response ->
-            log.info "HTTP $response.statusCode $requestType $url"
-            response
+                @Override
+                void onThrowable(Throwable t) {
+                    log.error "HTTP Error $requestType $url", t
+                    f.error(t)
+                }
+            })
         }).observeOn(resumingScheduler)
     }
 
@@ -138,6 +124,18 @@ class NingHttpClient {
 
     rx.Observable<Response> doDelete(String url) throws Exception {
         getResultAsResponse(RequestType.DELETE, url, null)
+    }
+
+    public static boolean isSuccess(Response response) {
+        return response?.statusCode >= 200 && response?.statusCode < 300
+    }
+
+    public static boolean isSuccess(Response response, String message, List errors) {
+        boolean success = isSuccess(response)
+        if (!success) {
+            errors << "HTTP $response.statusCode error $message".toString()
+        }
+        return success
     }
 
 }
