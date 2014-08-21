@@ -14,6 +14,21 @@ class HandlerUtilTest {
     }
 
     @Test
+    void "test period formatter no min"() {
+        assert "00:53:123" == HandlerUtil.PERIOD_FORMATTER.print(new Period(53123))
+    }
+
+    @Test
+    void "test period formatter no sec"() {
+        assert "00:00:123" == HandlerUtil.PERIOD_FORMATTER.print(new Period(123))
+    }
+
+    @Test
+    void "test period formatter no mills"() {
+        assert "02:35:000" == HandlerUtil.PERIOD_FORMATTER.print(new Period(155000))
+    }
+
+    @Test
     void "test getErrorMessage"() {
         assert "aaa" == HandlerUtil.getErrorMessage(new Exception("aaa"))
     }

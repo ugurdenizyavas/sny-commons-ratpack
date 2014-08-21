@@ -10,14 +10,17 @@ import org.joda.time.format.PeriodFormatterBuilder
 class HandlerUtil {
 
     static PeriodFormatter PERIOD_FORMATTER = new PeriodFormatterBuilder()
+            .printZeroAlways()
             .minimumPrintedDigits(2)
             .maximumParsedDigits(2)
             .appendMinutes()
             .appendSeparator(":")
+            .printZeroAlways()
             .minimumPrintedDigits(2)
             .maximumParsedDigits(2)
             .appendSeconds()
             .appendSeparator(":")
+            .printZeroAlways()
             .minimumPrintedDigits(3)
             .maximumParsedDigits(3)
             .appendMillis3Digit()
