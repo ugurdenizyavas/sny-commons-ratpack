@@ -138,4 +138,9 @@ class NingHttpClient {
         return success
     }
 
+    public static boolean isSuccess(Response response, String message) {
+        return isSuccess(response)
+    }
+
+
 }
