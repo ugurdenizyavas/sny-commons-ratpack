@@ -19,7 +19,7 @@ class EanCodeEnhancer implements ProductEnhancer {
     public static String parseFeed(String sku, InputStream feed) {
         def xml = new XmlSlurper().parse(feed)
         def eanCode = xml.product?.identifier?.find({ it['@type'] == 'ean_code' })?.text()
-        log.trace "ean code for $sku is $eanCode"
+        log.trace "ean code for {} is {}", sku, eanCode
         eanCode
     }
 

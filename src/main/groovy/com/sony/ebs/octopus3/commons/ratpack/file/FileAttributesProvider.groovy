@@ -28,7 +28,7 @@ class FileAttributesProvider {
                 observe(execControl.blocking {
                     def json = jsonSlurper.parseText(response.responseBody)
                     def lastModifiedTime = json.result?.lastModifiedTime
-                    log.info "lastModifiedTime for $urn is $lastModifiedTime"
+                    log.info "lastModifiedTime for {} is {}", urn, lastModifiedTime
                     return new FileAttribute(found: true, value: lastModifiedTime)
                 })
             } else {

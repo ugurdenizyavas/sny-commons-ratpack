@@ -40,7 +40,7 @@ class CategoryEnhancer implements ProductEnhancer {
     public <T> rx.Observable<T> enhance(T obj) throws Exception {
         rx.Observable.from("starting").flatMap({
             def categoryReadUrl = generateUrl(obj.publication, obj.locale)
-            log.info "category service url for $categoryReadUrl"
+            log.info "category service url for {}", categoryReadUrl
             httpClient.doGet(categoryReadUrl)
         }).filter({ Response response ->
             NingHttpClient.isSuccess(response, "getting octopus category feed")

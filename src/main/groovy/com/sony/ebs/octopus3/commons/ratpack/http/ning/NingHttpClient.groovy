@@ -73,7 +73,7 @@ class NingHttpClient {
     BoundRequestBuilder createRequestBuilder(RequestType requestType, String urlString, data) {
         def url = new URIBuilder(urlString).toString()
 
-        log.info "starting $requestType $url"
+        log.info "starting {} {}", requestType, url
 
         Realm realm = authenticationUser ? (new Realm.RealmBuilder()).setScheme(Realm.AuthScheme.BASIC).setPrincipal(authenticationUser).setPassword(authenticationPassword).build() : null
 
@@ -97,7 +97,7 @@ class NingHttpClient {
                 @Override
                 Response onCompleted(Response response) throws Exception {
                     f.success(response)
-                    log.info "HTTP $response.statusCode $requestType $url"
+                    log.info "HTTP {} {} {}", response.statusCode, requestType, url
                     response
                 }
 
