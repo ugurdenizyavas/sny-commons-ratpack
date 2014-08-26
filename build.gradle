@@ -24,7 +24,7 @@ buildscript {
         classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.0.2'
-        classpath 'io.ratpack:ratpack-gradle:0.9.7'
+        classpath "io.ratpack:ratpack-gradle:$ratpackVersion"
     }
 }
 
@@ -99,13 +99,13 @@ dependencies {
     compile 'com.sony.ebs.octopus3:octopus3-commons:1.1-SNAPSHOT'
 
     // spring
-    provided 'org.springframework:spring-core:4.0.5.RELEASE'
-    provided 'org.springframework:spring-context:4.0.5.RELEASE'
-    provided 'org.springframework:spring-beans:4.0.5.RELEASE'
+    provided "org.springframework:spring-core:$springVersion"
+    provided "org.springframework:spring-context:$springVersion"
+    provided "org.springframework:spring-beans:$springVersion"
 
     // ratpack
-    provided 'io.ratpack:ratpack-rx:0.9.7'
-    provided 'io.ratpack:ratpack-jackson:0.9.7'
+    compile ratpack.dependency("jackson")
+    compile ratpack.dependency("rx")
     //springloaded 'org.springsource.springloaded:springloaded-core:1.1.4'
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0', {
         exclude module: 'groovy-all'
