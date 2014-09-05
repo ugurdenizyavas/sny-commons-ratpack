@@ -4,7 +4,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransfor
 // PROJECT
 //======================================================================
 
-version = '1.1'
+version = '1.2-SNAPSHOT'
 group = 'com.sony.ebs.octopus3'
 
 //======================================================================
@@ -96,7 +96,7 @@ configurations.optional.transitive = false
 dependencies {
     compile 'commons-lang:commons-lang:2.4'
 
-    compile 'com.sony.ebs.octopus3:octopus3-commons:1.2'
+    compile 'com.sony.ebs.octopus3:octopus3-commons:1.2-SNAPSHOT'
 
     // spring
     provided "org.springframework:spring-core:$springVersion"
