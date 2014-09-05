@@ -18,7 +18,8 @@ class CategoryEnhancer implements ProductEnhancer {
 
     static String parseFeed(String sku, InputStream feed) {
         def xml = new XmlSlurper().parse(feed)
-        def result = xml.depthFirst().find { 'product'.equalsIgnoreCase(it.name()) && sku.equalsIgnoreCase(it.text()) }
+        //TODO: CADC sends 'some' products with "-" when product name includes "/". Fix this workaround. Use obj.parsedSheet.sku when saving repo.
+        def result = xml.depthFirst().find { 'product'.equalsIgnoreCase(it.name()) && (sku.equalsIgnoreCase(it.text()) || sku.replaceAll(/-/,"/").equalsIgnoreCase(it.text())) }
         result?.parent()?.parent()?.name?.text()
     }
 

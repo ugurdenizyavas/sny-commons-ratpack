@@ -25,6 +25,16 @@ class CategoryEnhancerTest {
     }
 
     @Test
+    void "test SGPCV5/B.AE"() {
+        assert "Xperia Tablet Z Accessories" == categoryEnhancer.parseFeed("SGPCV5/B.AE", getFeed())
+    }
+
+    @Test
+    void "test SGPCV5-Z.AE"() {
+        assert "Xperia Tablet Z Accessories" == categoryEnhancer.parseFeed("SGPCV5-Z.AE", getFeed())
+    }
+
+    @Test
     void "test VPL-VW90ES"() {
         assert "HCS Home Cinema Projectors" == categoryEnhancer.parseFeed("VPL-VW90ES", getFeed())
     }
