@@ -7,7 +7,7 @@ import org.junit.Test
 public class MaterialNameEncoderTest {
 
     @Test
-    public void decodingMaterialName() {
+    public void decode() {
         assert "Decoded material name is wrong.", "DSC-F828/CEE" == MaterialNameEncoder.decode("DSC-F828_2FCEE")
         assert "Decoded material name is wrong.", "DSC-F828\\CEE" == MaterialNameEncoder.decode("DSC-F828_5CCEE")
         assert "Decoded material name is wrong.", "DSC-F828" == MaterialNameEncoder.decode("DSC-F828")
@@ -16,7 +16,7 @@ public class MaterialNameEncoderTest {
     }
 
     @Test
-    public void encodingMaterialName() {
+    public void encode() {
         assert "Encoded material name is wrong.", "DSC-F828_2FCEE" == MaterialNameEncoder.encode("DSC-F828/CEE")
         assert "Encoded material name is wrong.", "DSC-F828_5CCEE" == MaterialNameEncoder.encode("DSC-F828\\CEE")
         assert "Encoded material name is wrong.", "DSC-F828" == MaterialNameEncoder.encode("DSC-F828")
@@ -25,13 +25,9 @@ public class MaterialNameEncoderTest {
     }
 
     @Test
-    public void encodingMaterialNameHavingSpace() {
+    public void encodeWithSpacea() {
         assert "Encoded material name is wrong.", "DSC-F828++CEE" == MaterialNameEncoder.encode("DSC-F828  CEE")
         assert "Encoded material name is wrong.", "DSC-F828+_2B+CEE" == MaterialNameEncoder.encode("DSC-F828 + CEE")
-    }
-
-    public void sanitizeString() {
-        assert "DSC-F828-CEE" == MaterialNameEncoder.sanitizeString('DSC-[-]-$-F828++CEE')
     }
 
 }
