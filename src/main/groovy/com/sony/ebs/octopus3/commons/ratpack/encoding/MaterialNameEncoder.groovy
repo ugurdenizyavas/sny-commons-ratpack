@@ -9,10 +9,10 @@ import org.apache.commons.lang.StringUtils
 @Slf4j
 public class MaterialNameEncoder {
 
+    static final Locale LOCALE = Locale.US
+
     private static final String BACKSLASH = "_5C"
-
     private static final String SLASH = "_2F"
-
     private static final String PLUS = "_2B"
 
     /**
@@ -22,7 +22,7 @@ public class MaterialNameEncoder {
      * @return String
      */
     public static String encode(String name) {
-        String newName = name
+        String newName = name?.toUpperCase(LOCALE)
         if (name) {
             newName = newName.replace("/", SLASH)
             newName = newName.replace("\\", BACKSLASH)
@@ -45,7 +45,7 @@ public class MaterialNameEncoder {
      * @return String
      */
     public static String decode(String name) {
-        String newName = name
+        String newName = name?.toUpperCase(LOCALE)
         if (name) {
             newName = newName.replace(SLASH, "/")
             newName = newName.replace(BACKSLASH, "\\")
