@@ -122,6 +122,10 @@ class NingHttpClient {
         getResultAsResponse(RequestType.POST, url, inputStream)
     }
 
+    rx.Observable<Response> doPost(String url, byte[] byteArray) throws Exception {
+        getResultAsResponse(RequestType.POST, url, byteArray)
+    }
+
     rx.Observable<Response> doDelete(String url) throws Exception {
         getResultAsResponse(RequestType.DELETE, url, null)
     }
