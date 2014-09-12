@@ -26,8 +26,14 @@ class EanCodeEnhancer implements ProductEnhancer {
 
     @Override
     public <T> rx.Observable<T> enhance(T obj) throws Exception {
-        String sku = obj.sku.toUpperCase(Locale.US)
-        def url = serviceUrl.replace(":product", MaterialNameEncoder.encode(sku))
+        enhance(obj, false)
+    }
+
+    @Override
+    def <T> rx.Observable<T> enhance(T obj, boolean encoded) throws Exception {
+        String sku = obj.sku
+        String product = encoded ? sku?.toUpperCase(MaterialNameEncoder.LOCALE) : MaterialNameEncoder.encode(sku)
+        def url = serviceUrl.replace(":product", product)
         log.trace "ean code service url for {} is {}", sku, url
         rx.Observable.from("starting").flatMap({
             httpClient.doGet(url)
@@ -48,30 +54,5 @@ class EanCodeEnhancer implements ProductEnhancer {
                 })
             }
         })
-
-        //TODO: CADC sends 'some' products with "-" when product name includes "/". Fix this workaround. Use obj.parsedSheet.sku when saving repo.
-        if (!obj.eanCode) {
-            url = serviceUrl.replace(":product", MaterialNameEncoder.encode(sku.replaceAll(/-/, "/")))
-            log.trace "ean code service url for {} is {}", sku, url
-            rx.Observable.from("starting").flatMap({
-                httpClient.doGet(url)
-            }).flatMap({ Response response ->
-                boolean found = NingHttpClient.isSuccess(response, "getting ean code")
-                if (!found) {
-                    log.debug "{} eliminated by eanCode not found in Octopus", sku
-                    rx.Observable.just(obj)
-                } else {
-                    observe(execControl.blocking {
-                        def eanCode = parseFeed(sku, response.responseBodyAsStream)
-                        if (eanCode) {
-                            obj.eanCode = eanCode
-                        } else {
-                            log.debug "{} eliminated by eanCode not found in xml", sku
-                        }
-                        obj
-                    })
-                }
-            })
-        }
     }
 }
