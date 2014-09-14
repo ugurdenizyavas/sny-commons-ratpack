@@ -16,7 +16,7 @@ class DeltaItem {
     String url
     String processId
 
-    DeltaUrnValue type
+    DeltaType type
 
     String urnStr
 

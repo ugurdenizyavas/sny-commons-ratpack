@@ -5,7 +5,7 @@ import com.sony.ebs.octopus3.commons.process.ProcessIdImpl
 import com.sony.ebs.octopus3.commons.ratpack.http.ning.MockNingResponse
 import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaUrnValue
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import groovy.mock.interceptor.MockFor
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
@@ -44,7 +44,7 @@ class AbstractDeltaServiceTest {
         mockDeltaUrlHelper = new StubFor(DeltaUrlHelper)
         mockHttpClient = new MockFor(NingHttpClient)
 
-        delta = new Delta(type: DeltaUrnValue.global_sku, publication: "SCORE", locale: "en_GB", since: "2014", cadcUrl: "http://cadc")
+        delta = new Delta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", since: "2014", cadcUrl: "http://cadc")
 
         deltaService = new AbstractDeltaService() {
             @Override

@@ -9,7 +9,7 @@ class DeltaSheetTest {
 
     @Before
     void before() {
-        deltaItem = new DeltaItem(type: DeltaUrnValue.global_sku, publication: "SCORE", locale: "en_GB", url: "//")
+        deltaItem = new DeltaItem(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//")
     }
 
     @Test

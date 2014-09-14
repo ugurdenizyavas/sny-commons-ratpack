@@ -16,7 +16,7 @@ class Delta {
     String locale
     String since
     String cadcUrl
-    DeltaUrnValue type
+    DeltaType type
 
     String finalSince
     String finalCadcUrl
@@ -29,7 +29,7 @@ class Delta {
 
     @JsonIgnore
     URN getLastModifiedUrn() {
-        new URNImpl(type?.toString(), [DeltaUrnValue.last_modified.toString(), publication, locale])
+        new URNImpl(type?.toString(), [DeltaType.last_modified.toString(), publication, locale])
     }
 
 }
