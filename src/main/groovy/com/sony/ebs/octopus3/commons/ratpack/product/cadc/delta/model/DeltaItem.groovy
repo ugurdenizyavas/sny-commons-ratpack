@@ -2,6 +2,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
@@ -19,12 +20,18 @@ class DeltaItem {
     DeltaType type
 
     String urnStr
+    String materialName
 
     @JsonIgnore
     List errors = []
 
-    void assignUrnStr(String materialName) {
-        urnStr = new URNImpl(type?.toString(), [publication, locale, materialName]).toString()
+    @JsonIgnore
+    URN getUrn() {
+        new URNImpl(type?.toString(), [publication, locale, materialName])
+    }
+
+    URN getUrnForType(DeltaType prmType) {
+        new URNImpl(prmType?.toString(), [publication, locale, materialName])
     }
 
 }
