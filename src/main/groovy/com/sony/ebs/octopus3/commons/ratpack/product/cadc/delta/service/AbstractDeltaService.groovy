@@ -76,11 +76,10 @@ abstract class AbstractDeltaService {
         }).flatMap({
             deltaUrlHelper.updateLastModified(delta)
         }).flatMap({
-            rx.Observable.merge(
-                    delta.urlList?.collect {
-                        this.importSingleSheet(delta, it)
-                    }
-                    , 30)
+            def list = delta.urlList.collect({ rx.Observable.just(it) })
+            rx.Observable.merge(list, 30)
+        }).flatMap({
+            importSingleSheet(delta, it)
         })
     }
 
