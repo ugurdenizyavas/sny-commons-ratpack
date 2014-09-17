@@ -41,7 +41,7 @@ abstract class AbstractDeltaService {
 
     abstract Object createServiceResultOnError(String error, String cadcUrl)
 
-    rx.Observable<String> importSingleSheet(Delta delta, String cadcUrl) {
+    rx.Observable<Object> importSingleSheet(Delta delta, String cadcUrl) {
         rx.Observable.from("starting").flatMap({
             def importUrl = cadcsourceSheetServiceUrl.replace(":publication", delta.publication).replace(":locale", delta.locale) + "?url=$cadcUrl"
             if (delta.processId?.id) importUrl += "&processId=${delta.processId?.id}"
@@ -57,7 +57,7 @@ abstract class AbstractDeltaService {
         })
     }
 
-    rx.Observable deltaFlow(Delta delta) {
+    rx.Observable<Object> deltaFlow(Delta delta) {
 
         rx.Observable.from("starting").flatMap({
             deltaUrlHelper.createSinceValue(delta)
