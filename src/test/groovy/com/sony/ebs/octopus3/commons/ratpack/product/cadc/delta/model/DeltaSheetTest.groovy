@@ -9,13 +9,12 @@ class DeltaSheetTest {
 
     @Before
     void before() {
-        deltaItem = new DeltaItem(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//")
+        deltaItem = new DeltaItem(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", materialName: "aaa")
     }
 
     @Test
-    void "setUrnStr"() {
-        deltaItem.assignUrnStr("aaa")
-        assert deltaItem.urnStr == "urn:global_sku:score:en_gb:aaa"
+    void "getUrnForSubType"() {
+        assert deltaItem.getUrnForSubType(DeltaType.xml).toString() == "urn:global_sku:xml:score:en_gb:aaa"
     }
 
 }
