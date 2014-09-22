@@ -36,13 +36,13 @@ class EanCodeEnhancerTest {
         mockNingHttpClient = new StubFor(NingHttpClient)
     }
 
-    def runEnhance(boolean encoded, String product) {
+    def runEnhance(boolean encoded, String product, String productKey = "sku") {
         eanCodeEnhancer.httpClient = mockNingHttpClient.proxyInstance()
 
         def result = new BlockingVariable(5)
         boolean valueSet = false
         execController.start {
-            eanCodeEnhancer.enhance([sku: product], encoded).subscribe({
+            eanCodeEnhancer.enhance([(productKey): product], encoded).subscribe({
                 valueSet = true
                 result.set(it)
             }, {
@@ -79,14 +79,14 @@ class EanCodeEnhancerTest {
         assert runEnhance(true, "a") == [sku: "a"]
     }
 
-    def runEnhanceSuccess(boolean encoded, String product, String expectedUrl, String responseBody) {
+    def runEnhanceSuccess(boolean encoded, String product, String expectedUrl, String responseBody, String productKey = "sku") {
         mockNingHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == expectedUrl
                 rx.Observable.just(new MockNingResponse(_statusCode: 200, _responseBody: responseBody))
             }
         }
-        runEnhance(encoded, product)
+        runEnhance(encoded, product, productKey)
     }
 
     @Test
@@ -106,6 +106,18 @@ class EanCodeEnhancerTest {
             </products>
             '''
         assert runEnhanceSuccess(false, "a/b+c", "/eancode/A_2FB_2BC", feed) == [sku: "a/b+c", eanCode: "4905524328974"]
+    }
+
+    @Test
+    void "enhance with eancode for materialName param"() {
+        String feed = '''
+            <products>
+                <product>
+                    <identifier type="ean_code"><![CDATA[4905524328974]]></identifier>
+                </product>
+            </products>
+            '''
+        assert runEnhanceSuccess(false, "abc", "/eancode/ABC", feed, "materialName") == [materialName: "abc", eanCode: "4905524328974"]
     }
 
     @Test

@@ -26,7 +26,7 @@ class EanCodeEnhancer implements ProductEnhancer {
 
     @Override
     def <T> rx.Observable<T> enhance(T obj, boolean encoded=false) throws Exception {
-        String sku = obj.sku
+        String sku = obj.sku ?: obj.materialName
         String product = encoded ? sku?.toUpperCase(MaterialNameEncoder.LOCALE) : MaterialNameEncoder.encode(sku)
         def url = serviceUrl.replace(":product", product)
         log.trace "ean code service url for {} is {}", sku, url
