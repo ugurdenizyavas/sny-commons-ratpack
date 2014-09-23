@@ -2,6 +2,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaItem
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepo
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import org.junit.Before
 import org.junit.Test
@@ -11,12 +12,14 @@ class RequestValidatorTest {
     RequestValidator validator
     Delta delta
     DeltaItem deltaItem
+    DeltaRepo deltaRepo
 
     @Before
     void before() {
         validator = new RequestValidator()
         delta = new Delta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
         deltaItem = new DeltaItem(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
+        deltaRepo = new DeltaRepo(type: DeltaType.global_sheet, publication: "GLOBAL", locale: "en_GB")
     }
 
     @Test
@@ -166,4 +169,50 @@ class RequestValidatorTest {
         deltaItem.locale = null
         assert validator.validateDeltaItem(deltaItem) == ["locale parameter is invalid"]
     }
+
+    @Test
+    void "validate deltaRepo"() {
+        assert !validator.validateDeltaRepo(deltaRepo)
+    }
+
+    @Test
+    void "validate deltaRepo type null"() {
+        deltaRepo.with {
+            type = null
+        }
+        assert validator.validateDeltaRepo(deltaRepo) == ["type parameter is invalid"]
+    }
+
+    @Test
+    void "validate deltaRepo valid sdate "() {
+        deltaRepo.with {
+            sdate = "2014-07-09T00:00:00.000Z"
+        }
+        assert !validator.validateDeltaRepo(deltaRepo)
+    }
+
+    @Test
+    void "validate deltaRepo invalid sdate "() {
+        deltaRepo.with {
+            sdate = "s1"
+        }
+        assert validator.validateDeltaRepo(deltaRepo) == ["sdate parameter is invalid"]
+    }
+
+    @Test
+    void "validate deltaRepo valid edate "() {
+        deltaRepo.with {
+            edate = "2014-07-09T00:00:00.000Z"
+        }
+        assert !validator.validateDeltaRepo(deltaRepo)
+    }
+
+    @Test
+    void "validate deltaRepo invalid edate "() {
+        deltaRepo.with {
+            edate = "s2"
+        }
+        assert validator.validateDeltaRepo(deltaRepo) == ["edate parameter is invalid"]
+    }
+
 }

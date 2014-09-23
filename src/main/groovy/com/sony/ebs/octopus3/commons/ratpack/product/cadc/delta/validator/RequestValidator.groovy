@@ -3,6 +3,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 import com.sony.ebs.octopus3.commons.date.ISODateUtils
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaItem
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepo
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.LocaleUtils
 import org.apache.http.client.utils.URIBuilder
@@ -10,6 +11,14 @@ import org.springframework.stereotype.Component
 
 @Slf4j
 class RequestValidator {
+
+    void validateDate(String name, String value, List errors) {
+        try {
+            ISODateUtils.toISODate(value)
+        } catch (e) {
+            errors << "$name parameter is invalid".toString()
+        }
+    }
 
     void validatePublication(String publication, List errors) {
         if (!(publication ==~ /[a-zA-Z0-9\-\_]+/)) {
@@ -42,16 +51,27 @@ class RequestValidator {
         }
         validatePublication(delta.publication, errors)
         validateLocale(delta.locale, errors)
-        try {
-            if (delta.since && !delta.since.equalsIgnoreCase("all")) {
-                ISODateUtils.toISODate(delta.since)
-            }
-        } catch (e) {
-            errors << "since parameter is invalid"
+
+        if (delta.since && !delta.since.equalsIgnoreCase("all")) {
+            validateDate("since", delta.since, errors)
         }
+
         if (!validateUrl(delta.cadcUrl)) {
             errors << "cadcUrl parameter is invalid"
         }
+        errors
+    }
+
+    List validateDeltaRepo(DeltaRepo deltaRepo) {
+        List errors = []
+
+        if (!deltaRepo.type) {
+            errors << "type parameter is invalid"
+        }
+        validatePublication(deltaRepo.publication, errors)
+        validateLocale(deltaRepo.locale, errors)
+        if (deltaRepo.sdate) validateDate("sdate", deltaRepo.sdate, errors)
+        if (deltaRepo.edate) validateDate("edate", deltaRepo.edate, errors)
         errors
     }
 
