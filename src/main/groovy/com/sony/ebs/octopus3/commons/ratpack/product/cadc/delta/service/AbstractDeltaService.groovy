@@ -8,6 +8,7 @@ import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
 import groovy.json.JsonException
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import org.apache.http.client.utils.URIBuilder
 import ratpack.exec.ExecControl
 
 import static ratpack.rx.RxRatpack.observe
@@ -43,9 +44,13 @@ abstract class AbstractDeltaService {
 
     rx.Observable<Object> importSingleSheet(Delta delta, String cadcUrl) {
         rx.Observable.from("starting").flatMap({
-            def importUrl = cadcsourceSheetServiceUrl.replace(":publication", delta.publication).replace(":locale", delta.locale) + "?url=$cadcUrl"
-            if (delta.processId?.id) importUrl += "&processId=${delta.processId?.id}"
-            localHttpClient.doGet(importUrl)
+            def initialUrl = cadcsourceSheetServiceUrl.replace(":publication", delta.publication).replace(":locale", delta.locale)
+            def urlBuilder = new URIBuilder(initialUrl)
+            urlBuilder.addParameter("url", cadcUrl)
+            if (delta.processId?.id) {
+                urlBuilder.addParameter("processId", delta.processId?.id)
+            }
+            localHttpClient.doGet(urlBuilder.toString())
         }).flatMap({ Response response ->
             observe(execControl.blocking({
                 createServiceResult(response, cadcUrl)

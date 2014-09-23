@@ -131,7 +131,7 @@ class AbstractDeltaServiceTest {
             }
             doGet(3) { String url ->
                 def sku = getSkuFromUrl(url)
-                assert url == "http://cadcsource/sheet/publication/SCORE/locale/en_GB?url=http://cadc/$sku&processId=123"
+                assert url == "http://cadcsource/sheet/publication/SCORE/locale/en_GB?url=http%3A%2F%2Fcadc%2F$sku&processId=123"
                 rx.Observable.from(new MockNingResponse(_statusCode: 200, _responseBody: createSheetResponse(sku)))
             }
         }
@@ -259,7 +259,7 @@ class AbstractDeltaServiceTest {
             }
             doGet(3) { String url ->
                 def sku = getSkuFromUrl(url)
-                assert url == "http://cadcsource/sheet/publication/SCORE/locale/en_GB?url=http://cadc/$sku"
+                assert url == "http://cadcsource/sheet/publication/SCORE/locale/en_GB?url=http%3A%2F%2Fcadc%2F$sku"
                 if (sku == "b") {
                     rx.Observable.from(new MockNingResponse(_statusCode: 500, _responseBody: 'err1'))
                 } else {
