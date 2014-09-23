@@ -108,17 +108,18 @@ class AbstractDeltaServiceTest {
     @Test
     void "success"() {
         mockDeltaUrlHelper.demand.with {
-            createSinceValue(1) {
-                assert it == delta
+            createSinceValue(1) { since, urn ->
+                assert since == delta.since
+                assert urn == delta.lastModifiedUrn
                 rx.Observable.just("s1")
             }
-            createDeltaUrl(1) { cadcUrl, locale, since ->
+            createCadcDeltaUrl(1) { cadcUrl, locale, since ->
                 assert cadcUrl == "http://cadc"
                 assert locale == "en_GB"
                 assert since == "s1"
                 rx.Observable.just("http://cadc/delta")
             }
-            updateLastModified(1) {
+            updateLastModified(1) { lastModifiedUrn, errors ->
                 rx.Observable.just("done")
             }
         }
@@ -150,13 +151,13 @@ class AbstractDeltaServiceTest {
     @Test
     void "no products to import"() {
         mockDeltaUrlHelper.demand.with {
-            createSinceValue(1) {
+            createSinceValue(1) { since, urn ->
                 rx.Observable.just("s1")
             }
-            createDeltaUrl(1) { cadcUrl, locale, since ->
+            createCadcDeltaUrl(1) { cadcUrl, locale, since ->
                 rx.Observable.just("http://cadc/delta")
             }
-            updateLastModified(1) {
+            updateLastModified(1) { lastModifiedUrn, errors ->
                 rx.Observable.just("done")
             }
         }
@@ -173,10 +174,10 @@ class AbstractDeltaServiceTest {
     @Test
     void "error getting delta"() {
         mockDeltaUrlHelper.demand.with {
-            createSinceValue(1) {
+            createSinceValue(1) { since, urn ->
                 rx.Observable.just("s1")
             }
-            createDeltaUrl(1) { cadcUrl, locale, since ->
+            createCadcDeltaUrl(1) { cadcUrl, locale, since ->
                 rx.Observable.just("http://cadc/delta")
             }
         }
@@ -193,10 +194,10 @@ class AbstractDeltaServiceTest {
     @Test
     void "error parsing cadc delta json"() {
         mockDeltaUrlHelper.demand.with {
-            createSinceValue(1) {
+            createSinceValue(1) { since, urn ->
                 rx.Observable.just("s1")
             }
-            createDeltaUrl(1) { cadcUrl, locale, since ->
+            createCadcDeltaUrl(1) { cadcUrl, locale, since ->
                 rx.Observable.just("http://cadc/delta")
             }
         }
@@ -213,13 +214,13 @@ class AbstractDeltaServiceTest {
     @Test
     void "error updating last modified date"() {
         mockDeltaUrlHelper.demand.with {
-            createSinceValue(1) {
+            createSinceValue(1) { since, urn ->
                 rx.Observable.just("s1")
             }
-            createDeltaUrl(1) { cadcUrl, locale, since ->
+            createCadcDeltaUrl(1) { cadcUrl, locale, since ->
                 rx.Observable.just("http://cadc/delta")
             }
-            updateLastModified(1) { Delta delta ->
+            updateLastModified(1) { lastModifiedUrn, errors ->
                 rx.Observable.just("error").filter({
                     delta.errors << "error updating last modified date"
                     false
@@ -240,13 +241,13 @@ class AbstractDeltaServiceTest {
     @Test
     void "one sheet is not imported"() {
         mockDeltaUrlHelper.demand.with {
-            createSinceValue(1) {
+            createSinceValue(1) { since, urn ->
                 rx.Observable.just("s1")
             }
-            createDeltaUrl(1) { cadcUrl, locale, since ->
+            createCadcDeltaUrl(1) { cadcUrl, locale, since ->
                 rx.Observable.just("http://cadc/delta")
             }
-            updateLastModified(1) {
+            updateLastModified(1) { lastModifiedUrn, errors ->
                 rx.Observable.just("done")
             }
         }

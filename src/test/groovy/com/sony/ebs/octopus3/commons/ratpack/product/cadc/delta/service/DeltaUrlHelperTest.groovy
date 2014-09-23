@@ -7,6 +7,7 @@ import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.urn.URN
+import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
 import org.junit.AfterClass
@@ -55,7 +56,7 @@ class DeltaUrlHelperTest {
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false
         execController.start {
-            deltaUrlHelper.updateLastModified(delta).subscribe({
+            deltaUrlHelper.updateLastModified(delta.lastModifiedUrn, delta.errors).subscribe({
                 valueSet = true
                 result.set(it)
             }, {
@@ -109,7 +110,7 @@ class DeltaUrlHelperTest {
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false
         execController.start {
-            deltaUrlHelper.createSinceValue(delta).subscribe({
+            deltaUrlHelper.createSinceValue(delta.since, delta.lastModifiedUrn).subscribe({
                 valueSet = true
                 result.set(it)
             }, {
@@ -160,7 +161,7 @@ class DeltaUrlHelperTest {
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false
         execController.start {
-            deltaUrlHelper.createDeltaUrl(cadcUrl, locale, since).subscribe({
+            deltaUrlHelper.createCadcDeltaUrl(cadcUrl, locale, since).subscribe({
                 valueSet = true
                 result.set(it)
             }, {
@@ -191,6 +192,69 @@ class DeltaUrlHelperTest {
     @Test
     void "create delta url since encoded"() {
         assert runCreateDeltaUrl("http://cadc/delta", "fr_BE", "2014-07-17T14:35:25.089+03:00") == "http://cadc/delta/changes/fr_BE?since=2014-07-17T14%3A35%3A25.089%2B03%3A00"
+    }
+
+    def runCreateDateParams(String sdate, String edate) {
+        deltaUrlHelper.fileAttributesProvider = mockFileAttributesProvider.proxyInstance()
+
+        def result = new BlockingVariable<String>(5)
+        boolean valueSet = false
+        execController.start {
+            deltaUrlHelper.createRepoDeltaUrl("//delta", sdate, edate, new URNImpl("a", ["b", "c"])).subscribe({
+                valueSet = true
+                result.set(it)
+            }, {
+                log.error "error", it
+                result.set("error")
+            }, {
+                if (!valueSet) result.set("outOfFlow")
+            })
+        }
+        result.get()
+    }
+
+    @Test
+    void "create repo delta url"() {
+        mockFileAttributesProvider.demand.with {
+            getLastModifiedTime(1) { URN urn ->
+                assert urn.toString() == "urn:a:b:c"
+                rx.Observable.just(new FileAttribute(found: true, value: "s1"))
+            }
+        }
+        assert runCreateDateParams(null, null) == "//delta?sdate=s1"
+    }
+
+    @Test
+    void "create repo delta url encoded"() {
+        mockFileAttributesProvider.demand.with {
+            getLastModifiedTime(1) { URN urn ->
+                assert urn.toString() == "urn:a:b:c"
+                rx.Observable.just(new FileAttribute(found: true, value: "2014-07-17T14:35:25.089+03:00"))
+            }
+        }
+        assert runCreateDateParams(null, null) == "//delta?sdate=2014-07-17T14%3A35%3A25.089%2B03%3A00"
+    }
+
+    @Test
+    void "create repo delta url sdate not found and edate"() {
+        mockFileAttributesProvider.demand.with {
+            getLastModifiedTime(1) { URN urn ->
+                assert urn.toString() == "urn:a:b:c"
+                rx.Observable.just(new FileAttribute(found: false))
+            }
+        }
+        assert runCreateDateParams(null, "s2") == "//delta?edate=s2"
+    }
+
+    @Test
+    void "create repo delta url with sdate"() {
+        assert runCreateDateParams("s1", null) == "//delta?sdate=s1"
+    }
+
+
+    @Test
+    void "create repo delta url with sdate and edate"() {
+        assert runCreateDateParams("s1", "s2") == "//delta?sdate=s1&edate=s2"
     }
 
 }

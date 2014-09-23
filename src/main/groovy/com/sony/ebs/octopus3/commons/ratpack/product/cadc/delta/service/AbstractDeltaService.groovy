@@ -60,10 +60,10 @@ abstract class AbstractDeltaService {
     rx.Observable<Object> deltaFlow(Delta delta) {
 
         rx.Observable.from("starting").flatMap({
-            deltaUrlHelper.createSinceValue(delta)
+            deltaUrlHelper.createSinceValue(delta.since, delta.lastModifiedUrn)
         }).flatMap({ String since ->
             delta.finalSince = since
-            deltaUrlHelper.createDeltaUrl(delta.cadcUrl, delta.locale, since)
+            deltaUrlHelper.createCadcDeltaUrl(delta.cadcUrl, delta.locale, since)
         }).flatMap({ String deltaUrl ->
             delta.finalCadcUrl = deltaUrl
             cadcHttpClient.doGet(deltaUrl)
@@ -74,7 +74,7 @@ abstract class AbstractDeltaService {
                 this.setUrlList(delta, response.responseBodyAsStream)
             }))
         }).flatMap({
-            deltaUrlHelper.updateLastModified(delta)
+            deltaUrlHelper.updateLastModified(delta.lastModifiedUrn, delta.errors)
         }).flatMap({
             def list = delta.urlList.collect({ rx.Observable.just(it) })
             rx.Observable.merge(list, 30)
