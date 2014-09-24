@@ -3,14 +3,34 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 import com.sony.ebs.octopus3.commons.date.ISODateUtils
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepo
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepoItem
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.LocaleUtils
 import org.apache.http.client.utils.URIBuilder
 
 @Slf4j
 class RequestValidator {
+
+    /**
+     * The url needs to be valid and should have a host
+     * @param url
+     * @return
+     */
+    private boolean validateUrl(String url) {
+        if (url) {
+            URIBuilder uriBuilder
+            try {
+                uriBuilder = new URIBuilder(url)
+            } catch (e) {
+                log.error "invalid url value $url", e
+                return false
+            }
+            uriBuilder.host
+        } else {
+            false
+        }
+    }
 
     void validateDate(String name, String value, List errors) {
         try {
@@ -62,16 +82,16 @@ class RequestValidator {
         errors
     }
 
-    List validateDeltaRepo(DeltaRepo deltaRepo) {
+    List validateRepoDelta(RepoDelta delta) {
         List errors = []
 
-        if (!deltaRepo.type) {
+        if (!delta.type) {
             errors << "type parameter is invalid"
         }
-        validatePublication(deltaRepo.publication, errors)
-        validateLocale(deltaRepo.locale, errors)
-        if (deltaRepo.sdate) validateDate("sdate", deltaRepo.sdate, errors)
-        if (deltaRepo.edate) validateDate("edate", deltaRepo.edate, errors)
+        validatePublication(delta.publication, errors)
+        validateLocale(delta.locale, errors)
+        if (delta.sdate) validateDate("sdate", delta.sdate, errors)
+        if (delta.edate) validateDate("edate", delta.edate, errors)
         errors
     }
 
@@ -94,7 +114,7 @@ class RequestValidator {
         errors
     }
 
-    List validateDeltaRepoItem(DeltaRepoItem deltaRepoItem) {
+    List validateRepoProduct(RepoProduct deltaRepoItem) {
         List errors = []
 
         if (!deltaRepoItem.type) {
@@ -108,24 +128,5 @@ class RequestValidator {
         errors
     }
 
-    /**
-     * The url needs to be valid and should have a host
-     * @param url
-     * @return
-     */
-    private boolean validateUrl(String url) {
-        if (url) {
-            URIBuilder uriBuilder
-            try {
-                uriBuilder = new URIBuilder(url)
-            } catch (e) {
-                log.error "invalid url value $url", e
-                return false
-            }
-            uriBuilder.host
-        } else {
-            false
-        }
-    }
 
 }

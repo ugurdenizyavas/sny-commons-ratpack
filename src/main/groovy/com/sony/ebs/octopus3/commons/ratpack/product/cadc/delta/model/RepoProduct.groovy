@@ -12,7 +12,7 @@ import groovy.util.logging.Slf4j
 @EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'materialName', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
-class DeltaRepoItem {
+class RepoProduct {
 
     DeltaType type
     String publication
