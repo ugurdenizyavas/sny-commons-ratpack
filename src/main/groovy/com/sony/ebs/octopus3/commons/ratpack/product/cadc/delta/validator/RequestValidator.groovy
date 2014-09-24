@@ -114,15 +114,15 @@ class RequestValidator {
         errors
     }
 
-    List validateRepoProduct(RepoProduct deltaRepoItem) {
+    List validateRepoProduct(RepoProduct product) {
         List errors = []
 
-        if (!deltaRepoItem.type) {
+        if (!product.type) {
             errors << "type parameter is invalid"
         }
-        validatePublication(deltaRepoItem.publication, errors)
-        validateLocale(deltaRepoItem.locale, errors)
-        if (!deltaRepoItem.materialName) {
+        validatePublication(product.publication, errors)
+        validateLocale(product.locale, errors)
+        if (!product.materialName) {
             errors << "sku parameter is invalid"
         }
         errors
