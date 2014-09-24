@@ -22,6 +22,8 @@ class RepoDelta {
     String edate
     ProcessId processId
 
+    String finalStartDate
+    String finalDeltaUrl
     List deltaUrns
 
     @JsonIgnore

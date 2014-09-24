@@ -58,33 +58,27 @@ class DeltaUrlHelper {
         }
     }
 
-    private String createRepoDeltaUrlInner(URIBuilder urlBuilder, String sdate, String edate) {
-        def addDate = { String name, String value ->
-            if (value)
-                urlBuilder.addParameter(name, value)
-        }
-        addDate("sdate", sdate)
-        addDate("edate", edate)
-        urlBuilder.toString()
+    rx.Observable<String> createRepoDeltaUrl(String initialUrl, String sdate, String edate) {
+        observe(execControl.blocking({
+            def uriBuilder = new URIBuilder(initialUrl)
+            def addDate = { String name, String value ->
+                if (value)
+                    uriBuilder.addParameter(name, value)
+            }
+            addDate("sdate", sdate)
+            addDate("edate", edate)
+            uriBuilder.toString()
+        }))
     }
 
-    rx.Observable<String> createRepoDeltaUrl(String initialUrl, String sdate, String edate, URN lastModifiedUrn) {
-        def urlBuilder = new URIBuilder(initialUrl)
-
+    rx.Observable<String> createStartDate(String sdate, URN lastModifiedUrn) {
         if (sdate) {
-            observe(execControl.blocking {
-                createRepoDeltaUrlInner(urlBuilder, sdate, edate)
-            })
+            rx.Observable.just(sdate)
         } else {
-            fileAttributesProvider.getLastModifiedTime(lastModifiedUrn)
-                    .flatMap({ result ->
-                observe(execControl.blocking {
-                    String lmt = result.found ? result.value : null
-                    createRepoDeltaUrlInner(urlBuilder, lmt, edate)
-                })
+            fileAttributesProvider.getLastModifiedTime(lastModifiedUrn).map({
+                it.found ? it.value : null
             })
         }
     }
-
 
 }
