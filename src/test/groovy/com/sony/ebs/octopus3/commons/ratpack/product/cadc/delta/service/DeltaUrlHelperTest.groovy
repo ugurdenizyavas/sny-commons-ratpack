@@ -4,7 +4,7 @@ import com.sony.ebs.octopus3.commons.ratpack.file.FileAttribute
 import com.sony.ebs.octopus3.commons.ratpack.file.FileAttributesProvider
 import com.sony.ebs.octopus3.commons.ratpack.http.ning.MockNingResponse
 import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
@@ -24,7 +24,7 @@ class DeltaUrlHelperTest {
     DeltaUrlHelper deltaUrlHelper
 
     StubFor mockNingHttpClient, mockFileAttributesProvider
-    Delta delta
+    CadcDelta delta
 
     static ExecController execController
 
@@ -47,7 +47,7 @@ class DeltaUrlHelperTest {
         mockNingHttpClient = new StubFor(NingHttpClient)
         mockFileAttributesProvider = new StubFor(FileAttributesProvider)
 
-        delta = new Delta(type: DeltaType.global_sku, publication: "SCORE", locale: "fr_BE")
+        delta = new CadcDelta(type: DeltaType.global_sku, publication: "SCORE", locale: "fr_BE")
     }
 
     def runUpdateLastModified() {
@@ -105,7 +105,7 @@ class DeltaUrlHelperTest {
     def runCreateSinceValue(String since) {
         deltaUrlHelper.fileAttributesProvider = mockFileAttributesProvider.proxyInstance()
 
-        def delta = new Delta(type: DeltaType.global_sku ,publication: "SCORE", locale: "fr_BE", cadcUrl: "http://cadc", since: since)
+        def delta = new CadcDelta(type: DeltaType.global_sku ,publication: "SCORE", locale: "fr_BE", cadcUrl: "http://cadc", since: since)
 
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false

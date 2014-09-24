@@ -1,14 +1,13 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
 import com.sony.ebs.octopus3.commons.date.ISODateUtils
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaItem
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepo
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepoItem
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.LocaleUtils
 import org.apache.http.client.utils.URIBuilder
-import org.springframework.stereotype.Component
 
 @Slf4j
 class RequestValidator {
@@ -44,7 +43,7 @@ class RequestValidator {
      * @param delta
      * @return
      */
-    List validateDelta(Delta delta) {
+    List validateCadcDelta(CadcDelta delta) {
         List errors = []
 
         if (!delta.type) {
@@ -78,18 +77,18 @@ class RequestValidator {
 
     /**
      * Validates all deltaSheet params
-     * @param deltaItem
+     * @param product
      * @return
      */
-    List validateDeltaItem(DeltaItem deltaItem) {
+    List validateCadcProduct(CadcProduct product) {
         List errors = []
 
-        if (!deltaItem.type) {
+        if (!product.type) {
             errors << "type parameter is invalid"
         }
-        validatePublication(deltaItem.publication, errors)
-        validateLocale(deltaItem.locale, errors)
-        if (!validateUrl(deltaItem.url)) {
+        validatePublication(product.publication, errors)
+        validateLocale(product.locale, errors)
+        if (!validateUrl(product.url)) {
             errors << "url parameter is invalid"
         }
         errors

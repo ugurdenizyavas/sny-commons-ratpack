@@ -13,7 +13,7 @@ import groovy.util.logging.Slf4j
 @EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'since', 'cadcUrl', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
-class Delta {
+class CadcDelta {
 
     DeltaType type
     String publication
