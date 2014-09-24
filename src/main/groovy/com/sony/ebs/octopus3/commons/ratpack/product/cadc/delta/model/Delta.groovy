@@ -5,18 +5,23 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.sony.ebs.octopus3.commons.process.ProcessId
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['processId', 'publication', 'locale', 'since', 'cadcUrl'])
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'since', 'cadcUrl', 'processId'])
+@EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'since', 'cadcUrl', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Slf4j
 class Delta {
 
-    ProcessId processId
+    DeltaType type
     String publication
     String locale
     String since
     String cadcUrl
-    DeltaType type
+
+    ProcessId processId
 
     String finalSince
     String finalCadcUrl

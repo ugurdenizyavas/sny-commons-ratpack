@@ -7,18 +7,22 @@ import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['processId', 'publication', 'locale', 'sdate', 'edate'])
-@EqualsAndHashCode
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'sdate', 'edate','processId'])
+@EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'sdate', 'edate','processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Slf4j
 class DeltaRepo {
 
     DeltaType type
-    ProcessId processId
     String publication
     String locale
     String sdate
     String edate
+
+    ProcessId processId
+
     List deltaUrns
 
     @JsonIgnore
@@ -31,7 +35,7 @@ class DeltaRepo {
 
     @JsonIgnore
     URN getLastModifiedUrn() {
-        new URNImpl(type.toString(), [DeltaType.last_modified.toString(), publication, locale])
+        new URNImpl(DeltaType.global_sku.toString(), [DeltaType.last_modified.toString(), publication, locale])
     }
 
     @JsonIgnore

@@ -3,6 +3,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaItem
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepo
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepoItem
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import org.junit.Before
 import org.junit.Test
@@ -13,6 +14,7 @@ class RequestValidatorTest {
     Delta delta
     DeltaItem deltaItem
     DeltaRepo deltaRepo
+    DeltaRepoItem deltaRepoItem
 
     @Before
     void before() {
@@ -20,6 +22,7 @@ class RequestValidatorTest {
         delta = new Delta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
         deltaItem = new DeltaItem(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
         deltaRepo = new DeltaRepo(type: DeltaType.global_sheet, publication: "GLOBAL", locale: "en_GB")
+        deltaRepoItem = new DeltaRepoItem(type: DeltaType.global_sheet, publication: "SCORE", locale: "en_GB", materialName: "a")
     }
 
     @Test
@@ -106,12 +109,6 @@ class RequestValidatorTest {
     }
 
     @Test
-    void "validate delta item type null"() {
-        deltaItem.type = null
-        assert validator.validateDeltaItem(deltaItem) == ["type parameter is invalid"]
-    }
-
-    @Test
     void "validate publication null"() {
         delta.publication = null
         assert validator.validateDelta(delta) == ["publication parameter is invalid"]
@@ -145,6 +142,12 @@ class RequestValidatorTest {
     void "validate publication alphanumeric"() {
         delta.publication = "SONY1"
         assert !validator.validateDelta(delta)
+    }
+
+    @Test
+    void "validate delta item type null"() {
+        deltaItem.type = null
+        assert validator.validateDeltaItem(deltaItem) == ["type parameter is invalid"]
     }
 
     @Test
@@ -213,6 +216,35 @@ class RequestValidatorTest {
             edate = "s2"
         }
         assert validator.validateDeltaRepo(deltaRepo) == ["edate parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item"() {
+        assert !validator.validateDeltaRepoItem(deltaRepoItem)
+    }
+
+    @Test
+    void "validate repo delta item type null"() {
+        deltaRepoItem.type = null
+        assert validator.validateDeltaRepoItem(deltaRepoItem) == ["type parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item invalid publication"() {
+        deltaRepoItem.publication = null
+        assert validator.validateDeltaRepoItem(deltaRepoItem) == ["publication parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item invalid locale"() {
+        deltaRepoItem.locale = null
+        assert validator.validateDeltaRepoItem(deltaRepoItem) == ["locale parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item invalid materialName"() {
+        deltaRepoItem.materialName = null
+        assert validator.validateDeltaRepoItem(deltaRepoItem) == ["sku parameter is invalid"]
     }
 
 }

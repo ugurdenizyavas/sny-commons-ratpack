@@ -4,23 +4,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['publication', 'locale', 'processId', 'url'])
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['publication', 'locale', 'processId', 'materialName','url'])
+@EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'url', 'materialName', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
 class DeltaItem {
 
+    DeltaType type
     String publication
     String locale
     String url
-    String processId
-
-    DeltaType type
-
-    String urnStr
     String materialName
+
+    String processId
 
     @JsonIgnore
     List errors = []

@@ -1,10 +1,8 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service
 
 import com.ning.http.client.Response
-import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 import com.sony.ebs.octopus3.commons.ratpack.file.FileAttributesProvider
 import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
 import com.sony.ebs.octopus3.commons.urn.URN
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder

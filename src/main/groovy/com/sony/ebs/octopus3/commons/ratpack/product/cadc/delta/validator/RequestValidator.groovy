@@ -4,6 +4,7 @@ import com.sony.ebs.octopus3.commons.date.ISODateUtils
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaItem
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepo
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaRepoItem
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.LocaleUtils
 import org.apache.http.client.utils.URIBuilder
@@ -90,6 +91,20 @@ class RequestValidator {
         validateLocale(deltaItem.locale, errors)
         if (!validateUrl(deltaItem.url)) {
             errors << "url parameter is invalid"
+        }
+        errors
+    }
+
+    List validateDeltaRepoItem(DeltaRepoItem deltaRepoItem) {
+        List errors = []
+
+        if (!deltaRepoItem.type) {
+            errors << "type parameter is invalid"
+        }
+        validatePublication(deltaRepoItem.publication, errors)
+        validateLocale(deltaRepoItem.locale, errors)
+        if (!deltaRepoItem.materialName) {
+            errors << "sku parameter is invalid"
         }
         errors
     }

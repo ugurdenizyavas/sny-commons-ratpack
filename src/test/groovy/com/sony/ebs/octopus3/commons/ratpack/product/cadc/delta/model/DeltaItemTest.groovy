@@ -3,7 +3,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model
 import org.junit.Before
 import org.junit.Test
 
-class DeltaSheetTest {
+class DeltaItemTest {
 
     DeltaItem deltaItem
 
