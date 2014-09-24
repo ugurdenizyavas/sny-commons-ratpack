@@ -18,7 +18,6 @@ class DeltaRepoItem {
     String publication
     String locale
     String materialName
-
     String processId
 
     @JsonIgnore

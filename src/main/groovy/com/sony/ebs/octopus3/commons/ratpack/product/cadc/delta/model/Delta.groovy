@@ -20,7 +20,6 @@ class Delta {
     String locale
     String since
     String cadcUrl
-
     ProcessId processId
 
     String finalSince

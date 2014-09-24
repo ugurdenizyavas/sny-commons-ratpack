@@ -8,7 +8,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['publication', 'locale', 'processId', 'materialName','url'])
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'url', 'materialName', 'processId'])
 @EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'url', 'materialName', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
@@ -19,7 +19,6 @@ class DeltaItem {
     String locale
     String url
     String materialName
-
     String processId
 
     @JsonIgnore

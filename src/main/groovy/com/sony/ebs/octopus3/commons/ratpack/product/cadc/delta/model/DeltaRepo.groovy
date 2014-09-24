@@ -20,7 +20,6 @@ class DeltaRepo {
     String locale
     String sdate
     String edate
-
     ProcessId processId
 
     List deltaUrns
