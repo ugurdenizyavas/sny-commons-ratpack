@@ -14,7 +14,7 @@ class DeltaItemTest {
 
     @Test
     void "getUrnForSubType"() {
-        assert deltaItem.getUrnForSubType(DeltaType.xml).toString() == "urn:global_sku:xml:score:en_gb:aaa"
+        assert deltaItem.getUrnForSubType(DeltaType.previous).toString() == "urn:global_sku:previous:score:en_gb:aaa"
     }
 
 }
