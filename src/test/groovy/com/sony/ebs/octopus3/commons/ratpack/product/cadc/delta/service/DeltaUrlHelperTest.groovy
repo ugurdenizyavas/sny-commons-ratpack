@@ -10,7 +10,6 @@ import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
-import org.apache.http.client.utils.URIBuilder
 import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
