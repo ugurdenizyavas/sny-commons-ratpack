@@ -105,6 +105,8 @@ dependencies {
     provided "org.springframework:spring-context:$springVersion"
     provided "org.springframework:spring-beans:$springVersion"
 
+    compile 'commons-io:commons-io:2.4'
+
     // ratpack
     compile ratpack.dependency("jackson")
     compile ratpack.dependency("rx")
@@ -122,6 +124,8 @@ dependencies {
         exclude group: 'org.slf4j'
         exclude group: 'org.apache.httpcomponents'
     }
+
+    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
 
     compile 'org.apache.httpcomponents:httpasyncclient:4.0.1'
     compile 'org.apache.httpcomponents:httpmime:4.3.4'
