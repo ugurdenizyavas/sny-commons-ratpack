@@ -1,169 +1,250 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.Delta
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaItem
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import org.junit.Before
 import org.junit.Test
 
 class RequestValidatorTest {
 
     RequestValidator validator
-    Delta delta
-    DeltaItem deltaItem
+    CadcDelta cadcDelta
+    CadcProduct cadcProduct
+    RepoDelta repoDelta
+    RepoProduct repoProduct
 
     @Before
     void before() {
         validator = new RequestValidator()
-        delta = new Delta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
-        deltaItem = new DeltaItem(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
+        cadcDelta = new CadcDelta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
+        cadcProduct = new CadcProduct(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
+        repoDelta = new RepoDelta(type: DeltaType.global_sheet, publication: "GLOBAL", locale: "en_GB")
+        repoProduct = new RepoProduct(type: DeltaType.global_sheet, publication: "SCORE", locale: "en_GB", materialName: "a")
     }
 
     @Test
     void "validate all"() {
-        assert !validator.validateDelta(delta)
+        assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
     void "validate url no protocol"() {
-        delta.cadcUrl = "//bbb"
-        assert !validator.validateDelta(delta)
+        cadcDelta.cadcUrl = "//bbb"
+        assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
     void "validate url no host"() {
-        delta.cadcUrl = "/bbb"
-        assert validator.validateDelta(delta) == ["cadcUrl parameter is invalid"]
+        cadcDelta.cadcUrl = "/bbb"
+        assert validator.validateCadcDelta(cadcDelta) == ["cadcUrl parameter is invalid"]
     }
 
     @Test
     void "validate url null"() {
-        delta.cadcUrl = null
-        assert validator.validateDelta(delta) == ["cadcUrl parameter is invalid"]
+        cadcDelta.cadcUrl = null
+        assert validator.validateCadcDelta(cadcDelta) == ["cadcUrl parameter is invalid"]
     }
 
     @Test
     void "validate url empty"() {
-        delta.cadcUrl = ""
-        assert validator.validateDelta(delta) == ["cadcUrl parameter is invalid"]
+        cadcDelta.cadcUrl = ""
+        assert validator.validateCadcDelta(cadcDelta) == ["cadcUrl parameter is invalid"]
     }
 
     @Test
     void "validate since value null"() {
-        delta.since = null
-        assert !validator.validateDelta(delta)
+        cadcDelta.since = null
+        assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
     void "validate since value empty"() {
-        delta.since = ""
-        assert !validator.validateDelta(delta)
+        cadcDelta.since = ""
+        assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
     void "validate since value all"() {
-        delta.since = "All"
-        assert !validator.validateDelta(delta)
+        cadcDelta.since = "All"
+        assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
     void "validate since value invalid"() {
-        delta.since = "2014-07-05T00-00:00.000Z"
-        assert validator.validateDelta(delta) == ["since parameter is invalid"]
+        cadcDelta.since = "2014-07-05T00-00:00.000Z"
+        assert validator.validateCadcDelta(cadcDelta) == ["since parameter is invalid"]
     }
 
     @Test
     void "validate since value short and invalid"() {
-        delta.since = "2014-07-05T00:00:00"
-        assert validator.validateDelta(delta) == ["since parameter is invalid"]
+        cadcDelta.since = "2014-07-05T00:00:00"
+        assert validator.validateCadcDelta(cadcDelta) == ["since parameter is invalid"]
     }
 
     @Test
     void "validate locale null"() {
-        delta.locale = null
-        assert validator.validateDelta(delta) == ["locale parameter is invalid"]
+        cadcDelta.locale = null
+        assert validator.validateCadcDelta(cadcDelta) == ["locale parameter is invalid"]
     }
 
     @Test
     void "validate locale empty"() {
-        delta.locale = ""
-        assert validator.validateDelta(delta) == ["locale parameter is invalid"]
+        cadcDelta.locale = ""
+        assert validator.validateCadcDelta(cadcDelta) == ["locale parameter is invalid"]
     }
 
     @Test
     void "validate locale invalid"() {
-        delta.locale = "tr_T"
-        assert validator.validateDelta(delta) == ["locale parameter is invalid"]
+        cadcDelta.locale = "tr_T"
+        assert validator.validateCadcDelta(cadcDelta) == ["locale parameter is invalid"]
     }
 
     @Test
     void "validate delta type null"() {
-        delta.type = null
-        assert validator.validateDelta(delta) == ["type parameter is invalid"]
-    }
-
-    @Test
-    void "validate delta item type null"() {
-        deltaItem.type = null
-        assert validator.validateDeltaItem(deltaItem) == ["type parameter is invalid"]
+        cadcDelta.type = null
+        assert validator.validateCadcDelta(cadcDelta) == ["type parameter is invalid"]
     }
 
     @Test
     void "validate publication null"() {
-        delta.publication = null
-        assert validator.validateDelta(delta) == ["publication parameter is invalid"]
+        cadcDelta.publication = null
+        assert validator.validateCadcDelta(cadcDelta) == ["publication parameter is invalid"]
     }
 
     @Test
     void "validate publication empty"() {
-        delta.publication = ""
-        assert validator.validateDelta(delta) == ["publication parameter is invalid"]
+        cadcDelta.publication = ""
+        assert validator.validateCadcDelta(cadcDelta) == ["publication parameter is invalid"]
     }
 
     @Test
     void "validate publication invalid"() {
-        delta.publication = "?aa"
-        assert validator.validateDelta(delta) == ["publication parameter is invalid"]
+        cadcDelta.publication = "?aa"
+        assert validator.validateCadcDelta(cadcDelta) == ["publication parameter is invalid"]
     }
 
     @Test
     void "validate publication with dash"() {
-        delta.publication = "SCORE-EDITORIAL"
-        assert !validator.validateDelta(delta)
+        cadcDelta.publication = "SCORE-EDITORIAL"
+        assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
     void "validate publication with underscore"() {
-        delta.publication = "SCORE_EDITORIAL"
-        assert !validator.validateDelta(delta)
+        cadcDelta.publication = "SCORE_EDITORIAL"
+        assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
     void "validate publication alphanumeric"() {
-        delta.publication = "SONY1"
-        assert !validator.validateDelta(delta)
+        cadcDelta.publication = "SONY1"
+        assert !validator.validateCadcDelta(cadcDelta)
+    }
+
+    @Test
+    void "validate delta item type null"() {
+        cadcProduct.type = null
+        assert validator.validateCadcProduct(cadcProduct) == ["type parameter is invalid"]
     }
 
     @Test
     void "validate delta item"() {
-        assert !validator.validateDeltaItem(deltaItem)
+        assert !validator.validateCadcProduct(cadcProduct)
     }
 
     @Test
     void "validate delta item invalid url"() {
-        deltaItem.url = "/a"
-        assert validator.validateDeltaItem(deltaItem) == ["url parameter is invalid"]
+        cadcProduct.url = "/a"
+        assert validator.validateCadcProduct(cadcProduct) == ["url parameter is invalid"]
     }
 
     @Test
     void "validate delta item invalid publication"() {
-        deltaItem.publication = null
-        assert validator.validateDeltaItem(deltaItem) == ["publication parameter is invalid"]
+        cadcProduct.publication = null
+        assert validator.validateCadcProduct(cadcProduct) == ["publication parameter is invalid"]
     }
 
     @Test
     void "validate delta item invalid locale"() {
-        deltaItem.locale = null
-        assert validator.validateDeltaItem(deltaItem) == ["locale parameter is invalid"]
+        cadcProduct.locale = null
+        assert validator.validateCadcProduct(cadcProduct) == ["locale parameter is invalid"]
     }
+
+    @Test
+    void "validate deltaRepo"() {
+        assert !validator.validateRepoDelta(repoDelta)
+    }
+
+    @Test
+    void "validate deltaRepo type null"() {
+        repoDelta.with {
+            type = null
+        }
+        assert validator.validateRepoDelta(repoDelta) == ["type parameter is invalid"]
+    }
+
+    @Test
+    void "validate deltaRepo valid sdate "() {
+        repoDelta.with {
+            sdate = "2014-07-09T00:00:00.000Z"
+        }
+        assert !validator.validateRepoDelta(repoDelta)
+    }
+
+    @Test
+    void "validate deltaRepo invalid sdate "() {
+        repoDelta.with {
+            sdate = "s1"
+        }
+        assert validator.validateRepoDelta(repoDelta) == ["sdate parameter is invalid"]
+    }
+
+    @Test
+    void "validate deltaRepo valid edate "() {
+        repoDelta.with {
+            edate = "2014-07-09T00:00:00.000Z"
+        }
+        assert !validator.validateRepoDelta(repoDelta)
+    }
+
+    @Test
+    void "validate deltaRepo invalid edate "() {
+        repoDelta.with {
+            edate = "s2"
+        }
+        assert validator.validateRepoDelta(repoDelta) == ["edate parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item"() {
+        assert !validator.validateRepoProduct(repoProduct)
+    }
+
+    @Test
+    void "validate repo delta item type null"() {
+        repoProduct.type = null
+        assert validator.validateRepoProduct(repoProduct) == ["type parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item invalid publication"() {
+        repoProduct.publication = null
+        assert validator.validateRepoProduct(repoProduct) == ["publication parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item invalid locale"() {
+        repoProduct.locale = null
+        assert validator.validateRepoProduct(repoProduct) == ["locale parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo delta item invalid materialName"() {
+        repoProduct.materialName = null
+        assert validator.validateRepoProduct(repoProduct) == ["sku parameter is invalid"]
+    }
+
 }
