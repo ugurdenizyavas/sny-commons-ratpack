@@ -8,7 +8,6 @@ import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
-import com.sun.javafx.fxml.builder.URLBuilder
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
