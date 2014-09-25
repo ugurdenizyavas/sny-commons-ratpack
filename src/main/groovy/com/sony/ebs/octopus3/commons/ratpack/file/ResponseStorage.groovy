@@ -18,6 +18,14 @@ class ResponseStorage {
     NingHttpClient ningHttpClient
     String saveUrl
 
+    /**
+     * Stores given response into repository to path [/responses/{urnValues}/{processId]]
+     *
+     * @param processId processId of the current job
+     * @param urnValues values of the urn to copy response (urn type is responses)
+     * @param response response to save
+     * @return true if response is saved successfully
+     */
     boolean store(String processId, ArrayList<String> urnValues, String response) {
         def url = new URIBuilder(saveUrl.replace(":urn", new URNImpl("responses", urnValues).toString())).addQueryParam("processId", processId).toString()
 
