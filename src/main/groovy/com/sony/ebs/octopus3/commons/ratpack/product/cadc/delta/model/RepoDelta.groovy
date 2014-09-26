@@ -9,8 +9,8 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'sdate', 'edate','processId'])
-@EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'sdate', 'edate','processId'])
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'sdate', 'edate', 'processId'])
+@EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'sdate', 'edate', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
 class RepoDelta {
@@ -30,18 +30,17 @@ class RepoDelta {
     List errors = []
 
     @JsonIgnore
-    URN getDeltaUrn() {
-        new URNImpl(DeltaType.global_sku.toString(), [publication, locale])
-    }
-
-    @JsonIgnore
     URN getLastModifiedUrn() {
-        new URNImpl(DeltaType.global_sku.toString(), [DeltaType.last_modified.toString(), publication, locale])
+        new URNImpl(type.toString(), [DeltaType.last_modified.toString(), publication, locale])
     }
 
     @JsonIgnore
     URN getBaseUrn() {
         new URNImpl(type.toString(), [publication, locale])
+    }
+
+    URN getUrnForType(DeltaType prmType) {
+        new URNImpl(prmType?.toString(), [publication, locale])
     }
 
 }
