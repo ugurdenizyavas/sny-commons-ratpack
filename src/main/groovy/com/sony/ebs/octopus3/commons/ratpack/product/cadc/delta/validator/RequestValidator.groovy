@@ -122,7 +122,7 @@ class RequestValidator {
         }
         validatePublication(product.publication, errors)
         validateLocale(product.locale, errors)
-        if (!product.materialName) {
+        if (!product.sku) {
             errors << "sku parameter is invalid"
         }
         errors

@@ -22,7 +22,7 @@ class RequestValidatorTest {
         cadcDelta = new CadcDelta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
         cadcProduct = new CadcProduct(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
         repoDelta = new RepoDelta(type: DeltaType.global_sheet, publication: "GLOBAL", locale: "en_GB")
-        repoProduct = new RepoProduct(type: DeltaType.global_sheet, publication: "SCORE", locale: "en_GB", materialName: "a")
+        repoProduct = new RepoProduct(type: DeltaType.global_sheet, publication: "SCORE", locale: "en_GB", sku: "a")
     }
 
     @Test
@@ -243,7 +243,7 @@ class RequestValidatorTest {
 
     @Test
     void "validate repo delta item invalid materialName"() {
-        repoProduct.materialName = null
+        repoProduct.sku = null
         assert validator.validateRepoProduct(repoProduct) == ["sku parameter is invalid"]
     }
 
