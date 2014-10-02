@@ -29,6 +29,10 @@ class CadcProduct {
         new URNImpl(type?.toString(), [publication, locale, materialName])
     }
 
+    URN getUrnForType(DeltaType prmType) {
+        new URNImpl(prmType?.toString(), [publication, locale, materialName])
+    }
+
     URN getUrnForSubType(DeltaType prmSubType) {
         new URNImpl(type?.toString(), [prmSubType?.toString(), publication, locale, materialName])
     }
