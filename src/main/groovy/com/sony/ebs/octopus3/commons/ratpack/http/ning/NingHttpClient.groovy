@@ -1,13 +1,17 @@
 package com.sony.ebs.octopus3.commons.ratpack.http.ning
 
+import com.ning.http.client.AsyncCompletionHandlerBase
 import com.ning.http.client.AsyncHttpClient
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder
 import com.ning.http.client.AsyncHttpClientConfig
 import com.ning.http.client.ProxyServer
 import com.ning.http.client.Realm
+import com.ning.http.client.Response
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
-import ratpack.exec.ExecControl
+import ratpack.launch.LaunchConfig
+import ratpack.rx.internal.ExecControllerBackedScheduler
+import rx.Scheduler
 
 import static ratpack.rx.RxRatpack.observe
 
@@ -18,16 +22,18 @@ class NingHttpClient {
         GET, POST, DELETE
     }
 
-    ExecControl execControl
+    LaunchConfig launchConfig
     String authenticationUser, authenticationPassword
     AsyncHttpClient asyncHttpClient
+    Scheduler resumingScheduler
 
     public NingHttpClient() {
     }
 
-    public NingHttpClient(ExecControl execControl, String proxyHost, int proxyPort,
+    public NingHttpClient(LaunchConfig launchConfig, String proxyHost, int proxyPort,
                           String proxyUser, String proxyPassword, String nonProxyHosts,
-                          String authenticationUser, String authenticationPassword) {
+                          String authenticationUser, String authenticationPassword,
+                          int connectionTimeout, int readTimeout) {
         AsyncHttpClientConfig config
         if (proxyHost) {
             def proxyServer = new ProxyServer(proxyHost, proxyPort, proxyUser, proxyPassword)
@@ -38,31 +44,36 @@ class NingHttpClient {
             }
             config = new AsyncHttpClientConfig.Builder()
                     .setProxyServer(proxyServer)
-                    .setConnectionTimeoutInMs(2000)
-                    .setRequestTimeoutInMs(10000)
+                    .setConnectionTimeoutInMs(connectionTimeout)
+                    .setRequestTimeoutInMs(readTimeout)
                     .build()
         } else {
             config = new AsyncHttpClientConfig.Builder()
-                    .setConnectionTimeoutInMs(2000)
-                    .setRequestTimeoutInMs(10000)
+                    .setConnectionTimeoutInMs(connectionTimeout)
+                    .setRequestTimeoutInMs(readTimeout)
                     .build()
         }
         asyncHttpClient = new AsyncHttpClient(config)
 
-        this.execControl = execControl
         this.authenticationUser = authenticationUser
         this.authenticationPassword = authenticationPassword
+
+        this.launchConfig = launchConfig
+
+        resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
-    public NingHttpClient(ExecControl execControl) {
+    public NingHttpClient(LaunchConfig launchConfig) {
         asyncHttpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder().build())
-        this.execControl = execControl
+        this.launchConfig = launchConfig
+
+        resumingScheduler = new ExecControllerBackedScheduler(launchConfig.execController)
     }
 
-    private def executeRequest(RequestType requestType, String urlString, String data = null) {
+    BoundRequestBuilder createRequestBuilder(RequestType requestType, String urlString, data) {
         def url = new URIBuilder(urlString).toString()
 
-        log.info "starting $requestType for $url"
+        log.info "starting {} {}", requestType, url
 
         Realm realm = authenticationUser ? (new Realm.RealmBuilder()).setScheme(Realm.AuthScheme.BASIC).setPrincipal(authenticationUser).setPassword(authenticationPassword).build() : null
 
@@ -77,34 +88,63 @@ class NingHttpClient {
                     .addHeader('Content-Type', 'multipart/form-data')
                     .setRealm(realm).setBody(data)
         }
-        requestBuilder.execute()
+        requestBuilder
     }
 
-    rx.Observable<String> executeRequestObservable(RequestType requestType, String url, String data = null)
-            throws Exception {
-        observe(execControl.blocking({
-            rx.Observable.from(executeRequest(requestType, url, data)).map({ response ->
-                if (response.statusCode < 200 || response.statusCode > 299) {
-                    def message = "error getting $response.uri with http status code $response.statusCode"
-                    log.error message
-                    throw new Exception(message)
+    rx.Observable<Response> getResultAsResponse(RequestType requestType, String url, data) {
+        observe(launchConfig.execController.control.promise { f ->
+            createRequestBuilder(requestType, url, data).execute(new AsyncCompletionHandlerBase() {
+                @Override
+                Response onCompleted(Response response) throws Exception {
+                    f.success(response)
+                    log.info "HTTP {} {} {}", response.statusCode, requestType, url
+                    response
                 }
-                log.info "finished getting $response.uri with http status code $response.statusCode"
-                response.responseBody
-            }).toBlocking().single()
-        }))
+
+                @Override
+                void onThrowable(Throwable t) {
+                    log.error "HTTP Error $requestType $url", t
+                    f.error(t)
+                }
+            })
+        }).observeOn(resumingScheduler)
     }
 
-    rx.Observable<String> doGet(String url) throws Exception {
-        executeRequestObservable(RequestType.GET, url)
+    rx.Observable<Response> doGet(String url) throws Exception {
+        getResultAsResponse(RequestType.GET, url, null)
     }
 
-    rx.Observable<String> doPost(String url, String data) throws Exception {
-        executeRequestObservable(RequestType.POST, url, data)
+    rx.Observable<Response> doPost(String url, String data) throws Exception {
+        getResultAsResponse(RequestType.POST, url, data)
     }
 
-    rx.Observable<String> doDelete(String url) throws Exception {
-        executeRequestObservable(RequestType.DELETE, url)
+    rx.Observable<Response> doPost(String url, InputStream inputStream) throws Exception {
+        getResultAsResponse(RequestType.POST, url, inputStream)
     }
+
+    rx.Observable<Response> doPost(String url, byte[] byteArray) throws Exception {
+        getResultAsResponse(RequestType.POST, url, byteArray)
+    }
+
+    rx.Observable<Response> doDelete(String url) throws Exception {
+        getResultAsResponse(RequestType.DELETE, url, null)
+    }
+
+    public static boolean isSuccess(Response response) {
+        return response?.statusCode >= 200 && response?.statusCode < 300
+    }
+
+    public static boolean isSuccess(Response response, String message, List errors) {
+        boolean success = isSuccess(response)
+        if (!success) {
+            errors << "HTTP $response.statusCode error $message".toString()
+        }
+        return success
+    }
+
+    public static boolean isSuccess(Response response, String message) {
+        return isSuccess(response)
+    }
+
 
 }
