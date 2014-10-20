@@ -13,19 +13,17 @@ import ratpack.launch.LaunchConfig
 import static ratpack.rx.RxRatpack.observe
 
 @Slf4j
-class RatpackOdw3HttpClient implements Oct3HttpClient {
-
-    LaunchConfig launchConfig
+class RatpackOct3HttpClient implements Oct3HttpClient {
 
     HttpClient httpClient
 
-    public RatpackOdw3HttpClient(LaunchConfig launchConfig,
+    public RatpackOct3HttpClient(LaunchConfig launchConfig,
                                  String authenticationUser, String authenticationPassword,
                                  int connectionTimeout, int readTimeout) {
         httpClient = new DefaultHttpClient(launchConfig)
     }
 
-    public RatpackOdw3HttpClient(LaunchConfig launchConfig) {
+    public RatpackOct3HttpClient(LaunchConfig launchConfig) {
         this(launchConfig, '', '', 0, 0)
     }
 
@@ -37,8 +35,10 @@ class RatpackOdw3HttpClient implements Oct3HttpClient {
                     uri = url.toURI()
                     request.headers.add('Accept-Charset', 'UTF-8')
                     request.url.set(uri)
+                    log.info "starting GET {}", url
                 })
         ).map { ReceivedResponse resp ->
+            log.info "HTTP {} GET {}", resp.statusCode, url
             new Oct3HttpResponse(uri: uri, statusCode: resp.statusCode, bodyAsBytes: resp.body.getBytes())
         }
     }
@@ -60,8 +60,10 @@ class RatpackOdw3HttpClient implements Oct3HttpClient {
                         }
                     })
                     request.url.set(uri)
+                    log.info "starting POST {}", url
                 })
         ).map { ReceivedResponse resp ->
+            log.info "HTTP {} POST {}", resp.statusCode, url
             new Oct3HttpResponse(uri: uri, statusCode: resp.statusCode, bodyAsBytes: resp.body.getBytes())
         }
     }

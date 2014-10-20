@@ -19,7 +19,7 @@ import static com.github.dreamhead.moco.Moco.httpserver
 import static com.github.dreamhead.moco.Moco.uri
 
 @Slf4j
-class RatpackOdw3HttpClientTest {
+class RatpackOct3HttpClientTest {
 
     ExecController execController
     LaunchConfig launchConfig
@@ -27,7 +27,7 @@ class RatpackOdw3HttpClientTest {
     static Runner runner
     static String serviceUrl
 
-    RatpackOdw3HttpClient httpClient
+    RatpackOct3HttpClient httpClient
 
     @BeforeClass
     static void initOnce() {
@@ -50,7 +50,7 @@ class RatpackOdw3HttpClientTest {
     void init() {
         launchConfig = LaunchConfigBuilder.noBaseDir().build()
         execController = launchConfig.execController
-        httpClient = new RatpackOdw3HttpClient(launchConfig)
+        httpClient = new RatpackOct3HttpClient(launchConfig)
     }
 
     @After
