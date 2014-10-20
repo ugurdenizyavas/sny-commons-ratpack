@@ -31,13 +31,15 @@ class RatpackOdw3HttpClient implements Oct3HttpClient {
 
     @Override
     rx.Observable<Oct3HttpResponse> doGet(String url) throws Exception {
+        URI uri
         observe(
                 httpClient.get({ RequestSpec request ->
+                    uri = url.toURI()
                     request.headers.add('Accept-Charset', 'UTF-8')
-                    request.url.set(url.toURI())
+                    request.url.set(uri)
                 })
         ).map { ReceivedResponse resp ->
-            new Oct3HttpResponse(statusCode: resp.statusCode, bodyAsBytes: resp.body.getBytes())
+            new Oct3HttpResponse(uri: uri, statusCode: resp.statusCode, bodyAsBytes: resp.body.getBytes())
         }
     }
 

@@ -34,9 +34,11 @@ class RatpackOdw3HttpClientTest {
         def server = httpserver(8000 + RandomUtils.nextInt(999))
         server.get(by(uri("/test1"))).response("aaa")
 
+        server.post(by(uri("/test2"))).response("bbb")
+
         runner = Runner.runner(server)
         runner.start()
-        serviceUrl = "http://localhost:${server.port()}/test1"
+        serviceUrl = "http://localhost:${server.port()}"
     }
 
     @AfterClass
@@ -56,28 +58,34 @@ class RatpackOdw3HttpClientTest {
         if (execController) execController.close()
     }
 
-    def runGet(String url) {
+    def runHttpClient(boolean isGetRequest, String url, String data = null) {
         def result = new BlockingVariable(5)
-        boolean valueSet = false
+        String finalUrl = serviceUrl + url
         execController.start {
-            httpClient.doGet(url).subscribe({
-                valueSet = true
+            (isGetRequest ? httpClient.doGet(finalUrl) : httpClient.doPost(finalUrl, data.getBytes("UTF-8"))).subscribe({
                 result.set(it)
             }, {
                 log.error "error in flow", it
                 result.set("error")
-            }, {
-                if (!valueSet) result.set("outOfFlow")
             })
         }
         result.get()
     }
 
     @Test
-    void "test"() {
-        def result = runGet(serviceUrl) as Oct3HttpResponse
-        assert result.statusCode == 200
-        assert result.bodyAsBytes == "aaa".getBytes("UTF-8")
+    void "test get"() {
+        def response = runHttpClient(true, "/test1") as Oct3HttpResponse
+        assert response.statusCode == 200
+        assert response.bodyAsBytes == "aaa".getBytes("UTF-8")
+        assert response.uri.toString() == serviceUrl + "/test1"
+    }
+
+    @Test
+    void "test post"() {
+        def response = runHttpClient(false, "/test2", "xxx") as Oct3HttpResponse
+        assert response.statusCode == 200
+        assert response.bodyAsBytes == "bbb".getBytes("UTF-8")
+        assert response.uri.toString() == serviceUrl + "/test2"
     }
 
 }
