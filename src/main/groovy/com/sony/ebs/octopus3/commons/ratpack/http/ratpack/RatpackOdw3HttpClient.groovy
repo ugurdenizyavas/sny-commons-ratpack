@@ -31,10 +31,12 @@ class RatpackOdw3HttpClient implements Oct3HttpClient {
 
     @Override
     rx.Observable<Oct3HttpResponse> doGet(String url) throws Exception {
-        observe(httpClient.get({ RequestSpec request ->
-            request.headers.add('Accept-Charset', 'UTF-8')
-            request.url.set(url.toURI())
-        })).map { ReceivedResponse resp ->
+        observe(
+                httpClient.get({ RequestSpec request ->
+                    request.headers.add('Accept-Charset', 'UTF-8')
+                    request.url.set(url.toURI())
+                })
+        ).map { ReceivedResponse resp ->
             new Oct3HttpResponse(statusCode: resp.statusCode, bodyAsBytes: resp.body.getBytes())
         }
     }
@@ -42,20 +44,22 @@ class RatpackOdw3HttpClient implements Oct3HttpClient {
     @Override
     rx.Observable<Oct3HttpResponse> doPost(String url, byte[] byteArray) throws Exception {
         URI uri
-        observe(httpClient.post({ RequestSpec request ->
-            uri = url.toURI()
-            request.headers.add('Accept-Charset', 'UTF-8')
-            request.headers.add('Content-Type', 'multipart/form-data')
-            request.body.stream({ OutputStream outputStream ->
-                try {
-                    outputStream.write(byteArray)
-                    outputStream.close()
-                } catch (IOException ex) {
-                    log.error "error writing request body", ex
-                }
-            })
-            request.url.set(uri)
-        })).map { ReceivedResponse resp ->
+        observe(
+                httpClient.post({ RequestSpec request ->
+                    uri = url.toURI()
+                    request.headers.add('Accept-Charset', 'UTF-8')
+                    request.headers.add('Content-Type', 'multipart/form-data')
+                    request.body.stream({ OutputStream outputStream ->
+                        try {
+                            outputStream.write(byteArray)
+                            outputStream.close()
+                        } catch (IOException ex) {
+                            log.error "error writing request body", ex
+                        }
+                    })
+                    request.url.set(uri)
+                })
+        ).map { ReceivedResponse resp ->
             new Oct3HttpResponse(uri: uri, statusCode: resp.statusCode, bodyAsBytes: resp.body.getBytes())
         }
     }
