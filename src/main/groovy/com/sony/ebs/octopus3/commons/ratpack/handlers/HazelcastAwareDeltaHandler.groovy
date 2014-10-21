@@ -39,26 +39,26 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
         D delta = createDelta(new ProcessIdImpl(context.request.queryParams['pid']), getFlow(), ServiceTypeEnum.DELTA, getPublication(context), getLocale(context))
         activity.info "Starting delta feed generation for {}", delta
 
-        //Validate context according to its flow
-        flowValidate context, delta
+        //Validate context according to its flow; continue if there is no error
+        if (!flowValidate(context, delta)) {
+            ongoingProcesses = populateOngoingProcesses()
 
-        ongoingProcesses = populateOngoingProcesses()
+            if (delta in ongoingProcesses) {
+                log.warn "Duplicate request ignored for delta {}", delta
+                activity.warn "{} request is ignored because there's already an ongoing delta for {}-{}", delta, delta.publication, delta.locale
+                context.response.status 400
+                delta.status = 400
+                def jsonResponse = generateDeltaResponse(delta)
 
-        if (delta in ongoingProcesses) {
-            log.warn "Duplicate request ignored for delta {}", delta
-            activity.warn "{} request is ignored because there's already an ongoing delta for {}-{}", delta, delta.publication, delta.locale
-            context.response.status 400
-            delta.status = 400
-            def jsonResponse = generateDeltaResponse(delta)
+                responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
 
-            responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
-
-            context.render jsonResponse
-        } else {
-            ongoingProcesses << delta
-            //do flow specific handle operations
-            flowHandle context, delta
-            ongoingProcesses.remove delta
+                context.render jsonResponse
+            } else {
+                ongoingProcesses << delta
+                //do flow specific handle operations
+                flowHandle context, delta
+                ongoingProcesses.remove delta
+            }
         }
 
     }
@@ -91,8 +91,9 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
 
     /**
      * Validates request
+     * @return true if there is an error
      */
-    abstract void flowValidate(GroovyContext context, D delta)
+    abstract boolean flowValidate(GroovyContext context, D delta)
 
     /**
      * Handle flow specific operations
