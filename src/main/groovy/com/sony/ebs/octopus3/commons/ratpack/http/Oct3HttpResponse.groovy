@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.http
 
+import com.ning.http.client.Response
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 
 class Oct3HttpResponse {
@@ -19,4 +20,12 @@ class Oct3HttpResponse {
     String getBodyAsText() {
         new String(bodyAsBytes, EncodingUtil.CHARSET)
     }
+
+    public boolean isSuccessful(String message, List errors) {
+        if (!success) {
+            errors << "HTTP $statusCode error $message".toString()
+        }
+        return success
+    }
+
 }
