@@ -1,5 +1,7 @@
 package com.sony.ebs.octopus3.commons.ratpack.http
 
+import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
+
 class Oct3HttpResponse {
 
     byte[] bodyAsBytes
@@ -14,4 +16,7 @@ class Oct3HttpResponse {
         new ByteArrayInputStream(bodyAsBytes)
     }
 
+    String getBodyAsText() {
+        new String(bodyAsBytes, EncodingUtil.CHARSET)
+    }
 }

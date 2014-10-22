@@ -1,25 +1,19 @@
-package com.sony.ebs.octopus3.commons.ratpack.http.ratpack
+package com.sony.ebs.octopus3.commons.ratpack.http.ning
 
 import com.github.dreamhead.moco.Runner
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.math.RandomUtils
-import org.junit.After
-import org.junit.AfterClass
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.*
 import ratpack.exec.ExecController
 import ratpack.launch.LaunchConfig
 import ratpack.launch.LaunchConfigBuilder
 import spock.util.concurrent.BlockingVariable
 
-import static com.github.dreamhead.moco.Moco.by
-import static com.github.dreamhead.moco.Moco.httpserver
-import static com.github.dreamhead.moco.Moco.uri
+import static com.github.dreamhead.moco.Moco.*
 
 @Slf4j
-class RatpackOct3HttpClientTest {
+class NingOct3HttpClientTest {
 
     ExecController execController
     LaunchConfig launchConfig
@@ -27,7 +21,7 @@ class RatpackOct3HttpClientTest {
     static Runner runner
     static String serviceUrl
 
-    RatpackOct3HttpClient httpClient
+    NingOct3HttpClient httpClient
 
     @BeforeClass
     static void initOnce() {
@@ -52,7 +46,7 @@ class RatpackOct3HttpClientTest {
     void init() {
         launchConfig = LaunchConfigBuilder.noBaseDir().build()
         execController = launchConfig.execController
-        httpClient = new RatpackOct3HttpClient(launchConfig)
+        httpClient = new NingOct3HttpClient(launchConfig)
     }
 
     @After
@@ -108,5 +102,4 @@ class RatpackOct3HttpClientTest {
         assert response.bodyAsBytes == "ccc".getBytes("UTF-8")
         assert response.uri.toString() == url
     }
-
 }
