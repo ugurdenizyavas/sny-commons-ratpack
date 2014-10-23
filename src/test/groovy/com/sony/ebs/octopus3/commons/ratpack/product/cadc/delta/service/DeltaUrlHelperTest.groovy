@@ -2,8 +2,8 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service
 
 import com.sony.ebs.octopus3.commons.ratpack.file.FileAttribute
 import com.sony.ebs.octopus3.commons.ratpack.file.FileAttributesProvider
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.MockNingResponse
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.urn.URN
@@ -23,7 +23,7 @@ class DeltaUrlHelperTest {
 
     DeltaUrlHelper deltaUrlHelper
 
-    StubFor mockNingHttpClient, mockFileAttributesProvider
+    StubFor mockHttpClient, mockFileAttributesProvider
     CadcDelta delta
 
     static ExecController execController
@@ -44,14 +44,14 @@ class DeltaUrlHelperTest {
         deltaUrlHelper = new DeltaUrlHelper(
                 execControl: execController.control,
                 repositoryFileServiceUrl: "/repository/file/:urn")
-        mockNingHttpClient = new StubFor(NingHttpClient)
+        mockHttpClient = new StubFor(Oct3HttpClient)
         mockFileAttributesProvider = new StubFor(FileAttributesProvider)
 
         delta = new CadcDelta(type: DeltaType.global_sku, publication: "SCORE", locale: "fr_BE")
     }
 
     def runUpdateLastModified() {
-        deltaUrlHelper.httpClient = mockNingHttpClient.proxyInstance()
+        deltaUrlHelper.httpClient = mockHttpClient.proxyInstance()
 
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false
@@ -71,11 +71,11 @@ class DeltaUrlHelperTest {
 
     @Test
     void "update last modified"() {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doPost(1) { String url, String data ->
                 assert url == "/repository/file/urn:global_sku:last_modified:score:fr_be"
                 assert data == "update"
-                rx.Observable.just(new MockNingResponse(_statusCode: 200))
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 200))
             }
         }
         assert runUpdateLastModified() == "done"
@@ -83,9 +83,9 @@ class DeltaUrlHelperTest {
 
     @Test
     void "update last modified outOfFlow"() {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doPost(1) { String url, String data ->
-                rx.Observable.just(new MockNingResponse(_statusCode: 500))
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 500))
             }
         }
         assert runUpdateLastModified() == "outOfFlow"
@@ -94,7 +94,7 @@ class DeltaUrlHelperTest {
 
     @Test
     void "update last modified error"() {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doPost(1) { String url, String data ->
                 throw new Exception("error updating last modified time")
             }

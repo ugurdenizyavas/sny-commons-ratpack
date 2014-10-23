@@ -1,7 +1,7 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.enhancer
 
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.MockNingResponse
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
 import org.junit.AfterClass
@@ -16,7 +16,8 @@ import spock.util.concurrent.BlockingVariable
 class EanCodeEnhancerTest {
 
     EanCodeEnhancer eanCodeEnhancer
-    StubFor mockNingHttpClient
+    StubFor mockHttpClient
+
     static ExecController execController
 
     @BeforeClass
@@ -31,13 +32,14 @@ class EanCodeEnhancerTest {
 
     @Before
     void before() {
-        eanCodeEnhancer = new EanCodeEnhancer(execControl: execController.control,
+        eanCodeEnhancer = new EanCodeEnhancer(
+                execControl: execController.control,
                 serviceUrl: "/eancode/:product")
-        mockNingHttpClient = new StubFor(NingHttpClient)
+        mockHttpClient = new StubFor(Oct3HttpClient)
     }
 
     def runEnhance(boolean encoded, String product, String productKey = "sku") {
-        eanCodeEnhancer.httpClient = mockNingHttpClient.proxyInstance()
+        eanCodeEnhancer.httpClient = mockHttpClient.proxyInstance()
 
         def result = new BlockingVariable(5)
         boolean valueSet = false
@@ -58,10 +60,10 @@ class EanCodeEnhancerTest {
     @Test
     void "enhance no eancode in feed"() {
         String feed = '<products></products>'
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/eancode/A"
-                rx.Observable.just(new MockNingResponse(_statusCode: 200, _responseBody: feed))
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: feed.bytes))
             }
         }
         assert runEnhance(true, "a") == [sku: "a"]
@@ -70,20 +72,20 @@ class EanCodeEnhancerTest {
 
     @Test
     void "enhance not found from web service"() {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/eancode/A"
-                rx.Observable.just(new MockNingResponse(_statusCode: 404))
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 404))
             }
         }
         assert runEnhance(true, "a") == [sku: "a"]
     }
 
     def runEnhanceSuccess(boolean encoded, String product, String expectedUrl, String responseBody, String productKey = "sku") {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == expectedUrl
-                rx.Observable.just(new MockNingResponse(_statusCode: 200, _responseBody: responseBody))
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: responseBody.bytes))
             }
         }
         runEnhance(encoded, product, productKey)

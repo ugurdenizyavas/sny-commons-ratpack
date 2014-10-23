@@ -1,7 +1,7 @@
 package com.sony.ebs.octopus3.commons.ratpack.file
 
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
 import com.sony.ebs.octopus3.commons.urn.URNCreationException
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.util.logging.Slf4j
 import groovyx.net.http.URIBuilder
@@ -31,17 +31,15 @@ class ResponseStorage {
         try {
             def url = new URIBuilder(saveUrl.replace(":urn", new URNImpl("responses", urnValues).toString())).addQueryParam("processId", processId).toString()
 
-            ningHttpClient.doPost(url, IOUtils.toInputStream(response, Charset.forName('UTF-8')))
-                    .subscribe(
-                    {
-                        log.debug "Response is sent to repository with url: {}", url
-                        NingHttpClient.isSuccess(it)
-                    },
-                    { e ->
-                        log.error "Error in sending response to repository with url: ${url}", e
-                        false
-                    }
-            )
+        httpClient.doPost(url, IOUtils.toInputStream(response, Charset.forName('UTF-8'))).subscribe(
+                {
+                    log.debug "Response is sent to repository with url: {}", url
+                    it.success
+                },
+                { e ->
+                    log.error "Error in sending response to repository with url: ${url}", e
+                    false
+                }
         } catch (URNCreationException e) {
             log.warn "Cannot write response to repository since urn parameters are invalid {}", urnValues
         }

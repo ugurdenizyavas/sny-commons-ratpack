@@ -1,8 +1,8 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service
 
-import com.ning.http.client.Response
 import com.sony.ebs.octopus3.commons.ratpack.file.FileAttributesProvider
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.urn.URN
 import groovy.util.logging.Slf4j
 import org.apache.http.client.utils.URIBuilder
@@ -17,7 +17,7 @@ class DeltaUrlHelper {
 
     String repositoryFileServiceUrl
 
-    NingHttpClient httpClient
+    Oct3HttpClient httpClient
 
     FileAttributesProvider fileAttributesProvider
 
@@ -25,8 +25,8 @@ class DeltaUrlHelper {
         rx.Observable.just("starting").flatMap({
             def url = repositoryFileServiceUrl.replace(":urn", lastModifiedUrn?.toString())
             httpClient.doPost(url, "update")
-        }).filter({ Response response ->
-            NingHttpClient.isSuccess(response, "updating last modified date", errors)
+        }).filter({ Oct3HttpResponse response ->
+            response.isSuccessful("updating last modified date", errors)
         }).map({
             "done"
         })

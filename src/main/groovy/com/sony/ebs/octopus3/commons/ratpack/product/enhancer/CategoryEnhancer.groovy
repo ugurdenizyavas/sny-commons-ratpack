@@ -1,8 +1,8 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.enhancer
 
-import com.ning.http.client.Response
 import com.sony.ebs.octopus3.commons.ratpack.encoding.MaterialNameEncoder
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import groovy.util.logging.Slf4j
 import ratpack.exec.ExecControl
 
@@ -15,7 +15,7 @@ class CategoryEnhancer implements ProductEnhancer {
 
     String categoryServiceUrl
 
-    NingHttpClient httpClient
+    Oct3HttpClient httpClient
 
     ExecControl execControl
 
@@ -53,11 +53,11 @@ class CategoryEnhancer implements ProductEnhancer {
             def categoryReadUrl = generateUrl(obj.publication, obj.locale)
             log.info "category service url for {}", categoryReadUrl
             httpClient.doGet(categoryReadUrl)
-        }).filter({ Response response ->
-            NingHttpClient.isSuccess(response, "getting octopus category feed")
-        }).flatMap({ Response response ->
+        }).filter({ Oct3HttpResponse response ->
+            response.success
+        }).flatMap({ Oct3HttpResponse response ->
             observe(execControl.blocking {
-                obj.category = parseFeed(obj.sku, encoded, response.responseBodyAsStream)
+                obj.category = parseFeed(obj.sku, encoded, response.bodyAsStream)
                 obj
             })
         })
