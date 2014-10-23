@@ -18,9 +18,8 @@ import static ratpack.rx.RxRatpack.observe
 class RatpackOct3HttpClient implements Oct3HttpClient {
 
     HttpClient httpClient
-
-
-    final static String HTTP_POST
+    String authenticationUser, authenticationPassword
+    int connectionTimeout, readTimeout
 
     public RatpackOct3HttpClient(LaunchConfig launchConfig,
                                  String authenticationUser, String authenticationPassword,
