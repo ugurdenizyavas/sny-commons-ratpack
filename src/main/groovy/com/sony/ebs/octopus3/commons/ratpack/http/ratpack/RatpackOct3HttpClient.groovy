@@ -21,15 +21,19 @@ class RatpackOct3HttpClient implements Oct3HttpClient {
     final static BASE64Encoder BASE64_ENCODER = new BASE64Encoder()
 
     HttpClient httpClient
-    String authenticationUser, authenticationPassword
+    String authorizationHeaderValue
     int connectionTimeout, readTimeout
 
     public RatpackOct3HttpClient(LaunchConfig launchConfig,
                                  String authenticationUser, String authenticationPassword,
                                  int connectionTimeout, int readTimeout) {
         httpClient = new DefaultHttpClient(launchConfig)
-        this.authenticationUser = authenticationUser
-        this.authenticationPassword = authenticationPassword
+
+        if (authenticationUser) {
+            def bytes = (authenticationUser + ':' + authenticationPassword).getBytes(EncodingUtil.CHARSET)
+            authorizationHeaderValue = 'Basic ' + BASE64_ENCODER.encode(bytes)
+            log.info "authorizationHeaderValue assigned for {}", authenticationUser
+        }
         this.connectionTimeout = connectionTimeout
         this.readTimeout = readTimeout
     }
@@ -44,10 +48,8 @@ class RatpackOct3HttpClient implements Oct3HttpClient {
                 httpClient.request({ RequestSpec request ->
                     uri = url.toURI()
                     request.headers.add('Accept-Charset', 'UTF-8')
-
-                    if (authenticationUser) {
-                        def encodedUserPwd = BASE64_ENCODER.encode((authenticationUser + ":" + authenticationPassword).bytes)
-                        request.headers.add('Authorization', 'Basic ' + encodedUserPwd)
+                    if (authorizationHeaderValue) {
+                        request.headers.add('Authorization', authorizationHeaderValue)
                     }
 
                     request.url.set(uri)
