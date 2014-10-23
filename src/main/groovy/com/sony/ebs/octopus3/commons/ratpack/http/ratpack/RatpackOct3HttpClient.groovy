@@ -11,11 +11,14 @@ import ratpack.http.client.ReceivedResponse
 import ratpack.http.client.RequestSpec
 import ratpack.http.client.internal.DefaultHttpClient
 import ratpack.launch.LaunchConfig
+import sun.misc.BASE64Encoder
 
 import static ratpack.rx.RxRatpack.observe
 
 @Slf4j
 class RatpackOct3HttpClient implements Oct3HttpClient {
+
+    final static BASE64Encoder BASE64_ENCODER = new BASE64Encoder()
 
     HttpClient httpClient
     String authenticationUser, authenticationPassword
@@ -25,6 +28,10 @@ class RatpackOct3HttpClient implements Oct3HttpClient {
                                  String authenticationUser, String authenticationPassword,
                                  int connectionTimeout, int readTimeout) {
         httpClient = new DefaultHttpClient(launchConfig)
+        this.authenticationUser = authenticationUser
+        this.authenticationPassword = authenticationPassword
+        this.connectionTimeout = connectionTimeout
+        this.readTimeout = readTimeout
     }
 
     public RatpackOct3HttpClient(LaunchConfig launchConfig) {
@@ -37,6 +44,12 @@ class RatpackOct3HttpClient implements Oct3HttpClient {
                 httpClient.request({ RequestSpec request ->
                     uri = url.toURI()
                     request.headers.add('Accept-Charset', 'UTF-8')
+
+                    if (authenticationUser) {
+                        def encodedUserPwd = BASE64_ENCODER.encode((authenticationUser + ":" + authenticationPassword).bytes)
+                        request.headers.add('Authorization', 'Basic ' + encodedUserPwd)
+                    }
+
                     request.url.set(uri)
                     request.method(httpMethod.toString())
 
