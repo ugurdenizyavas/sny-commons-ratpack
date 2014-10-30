@@ -1,8 +1,8 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.enhancer
 
-import com.ning.http.client.Response
 import com.sony.ebs.octopus3.commons.ratpack.encoding.MaterialNameEncoder
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import groovy.util.logging.Slf4j
 import ratpack.exec.ExecControl
 
@@ -13,7 +13,7 @@ class EanCodeEnhancer implements ProductEnhancer {
 
     String serviceUrl
 
-    NingHttpClient httpClient
+    Oct3HttpClient httpClient
 
     ExecControl execControl
 
@@ -39,14 +39,13 @@ class EanCodeEnhancer implements ProductEnhancer {
         log.trace "ean code service url for {} is {}", sku, url
         rx.Observable.from("starting").flatMap({
             httpClient.doGet(url)
-        }).flatMap({ Response response ->
-            boolean found = NingHttpClient.isSuccess(response, "getting ean code")
-            if (!found) {
+        }).flatMap({ Oct3HttpResponse response ->
+            if (!response.success) {
                 log.debug "{} eliminated by eanCode not found in Octopus", sku
                 rx.Observable.just(obj)
             } else {
                 observe(execControl.blocking {
-                    def eanCode = parseFeed(sku, response.responseBodyAsStream)
+                    def eanCode = parseFeed(sku, response.bodyAsStream)
                     if (eanCode) {
                         obj.eanCode = eanCode
                     } else {

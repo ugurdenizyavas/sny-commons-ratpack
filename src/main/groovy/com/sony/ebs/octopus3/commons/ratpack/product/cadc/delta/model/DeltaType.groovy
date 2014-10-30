@@ -5,6 +5,7 @@ enum DeltaType {
     global_sku,
     last_modified,
     global_sheet,
+    latest,
     previous,
     flixMedia,
     category,

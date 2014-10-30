@@ -1,7 +1,7 @@
 package com.sony.ebs.octopus3.commons.ratpack.file
 
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.MockNingResponse
-import com.sony.ebs.octopus3.commons.ratpack.http.ning.NingHttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
@@ -31,7 +31,7 @@ class FileAttributesProviderTest {
 '''
 
     FileAttributesProvider deltaDatesProvider
-    StubFor mockNingHttpClient
+    StubFor mockHttpClient
 
     static ExecController execController
 
@@ -50,11 +50,11 @@ class FileAttributesProviderTest {
         deltaDatesProvider = new FileAttributesProvider(
                 execControl: execController.control,
                 repositoryFileAttributesServiceUrl: "/repository/fileattributes/:urn")
-        mockNingHttpClient = new StubFor(NingHttpClient)
+        mockHttpClient = new StubFor(Oct3HttpClient)
     }
 
     def runGetLastModifiedTime() {
-        deltaDatesProvider.httpClient = mockNingHttpClient.proxyInstance()
+        deltaDatesProvider.httpClient = mockHttpClient.proxyInstance()
 
         def result = new BlockingVariable(5)
         boolean valueSet = false
@@ -74,10 +74,10 @@ class FileAttributesProviderTest {
 
     @Test
     void "getLastModifiedTime found"() {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/repository/fileattributes/urn:test:a"
-                rx.Observable.just(new MockNingResponse(_statusCode: 200, _responseBody: FILE_ATTR_FEED))
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: FILE_ATTR_FEED.getBytes("UTF-8")))
             }
         }
         runGetLastModifiedTime() == new FileAttribute(found: true, value: "t1")
@@ -85,10 +85,10 @@ class FileAttributesProviderTest {
 
     @Test
     void "getLastModifiedTime not found"() {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doGet(1) { String url ->
                 assert url == "/repository/fileattributes/urn:test:a"
-                rx.Observable.just(new MockNingResponse(_statusCode: 404))
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 404))
             }
         }
         runGetLastModifiedTime() == new FileAttribute(found: false)
@@ -96,7 +96,7 @@ class FileAttributesProviderTest {
 
     @Test
     void "getLastModifiedTime error"() {
-        mockNingHttpClient.demand.with {
+        mockHttpClient.demand.with {
             doGet(1) { String url ->
                 throw new Exception("error getLastModifiedTime")
             }

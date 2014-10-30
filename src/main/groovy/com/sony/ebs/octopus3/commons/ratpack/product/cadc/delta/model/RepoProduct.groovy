@@ -29,8 +29,11 @@ class RepoProduct {
         new URNImpl(type?.toString(), [publication, locale, sku])
     }
 
+    URN getUrnForType(DeltaType prmType) {
+        new URNImpl(prmType?.toString(), [publication, locale, sku])
+    }
+
     URN getUrnForSubType(DeltaType prmSubType) {
         new URNImpl(type?.toString(), [prmSubType?.toString(), publication, locale, sku])
     }
-
 }

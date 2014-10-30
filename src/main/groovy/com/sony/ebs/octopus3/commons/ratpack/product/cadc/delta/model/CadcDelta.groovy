@@ -36,4 +36,8 @@ class CadcDelta {
         new URNImpl(type?.toString(), [DeltaType.last_modified.toString(), publication, locale])
     }
 
+    URN getUrnForType(DeltaType prmType) {
+        new URNImpl(prmType?.toString(), [publication, locale])
+    }
+
 }
