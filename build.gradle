@@ -136,6 +136,9 @@ dependencies {
         exclude group: 'org.slf4j'
         exclude group: 'org.apache.httpcomponents'
     }
+
+    //mongodb
+    compile 'org.springframework.data:spring-data-mongodb:1.6.0.RELEASE'
 }
 
 //======================================================================
