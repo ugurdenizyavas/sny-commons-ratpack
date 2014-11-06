@@ -10,10 +10,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import ratpack.groovy.handling.GroovyContext
 import ratpack.groovy.handling.GroovyHandler
-import ratpack.jackson.JsonRender
 import com.sony.ebs.octopus3.commons.flows.Delta
 
 import java.util.concurrent.CopyOnWriteArrayList
+
+import static ratpack.jackson.Jackson.json
 
 /**
  * author: TRYavasU
@@ -40,7 +41,8 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
         activity.info "Starting delta feed generation for {}", delta
 
         //Validate context according to its flow; continue if there is no error
-        if (!flowValidate(context, delta)) {
+        def errors = flowValidate(context, delta)
+        if (!errors) {
             ongoingProcesses = populateOngoingProcesses()
 
             if (delta in ongoingProcesses) {
@@ -48,7 +50,7 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
                 activity.warn "{} request is ignored because there's already an ongoing delta for {}-{}", delta, delta.publication, delta.locale
                 context.response.status 400
                 delta.status = 400
-                def jsonResponse = generateDeltaResponse(delta)
+                def jsonResponse = json(status: 400, errors: errors, delta: delta)
 
                 responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
 
@@ -91,22 +93,14 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
 
     /**
      * Validates request
-     * @return true if there is an error
+     * @return list of errors
      */
-    abstract boolean flowValidate(GroovyContext context, D delta)
+    abstract List flowValidate(GroovyContext context, D delta)
 
     /**
      * Handle flow specific operations
      */
     abstract void flowHandle(GroovyContext context, D delta)
-
-    /**
-     * Generate a Json response for duplicate request
-     * @param delta
-     * @return
-     */
-    //TODO: Generate a generic response
-    abstract JsonRender generateDeltaResponse(D delta)
 
     /**
      * Creates a delta object of type D
