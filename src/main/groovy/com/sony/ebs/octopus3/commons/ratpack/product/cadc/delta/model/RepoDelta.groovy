@@ -2,6 +2,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.sony.ebs.octopus3.commons.flows.Delta
 import com.sony.ebs.octopus3.commons.process.ProcessId
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
@@ -13,14 +14,11 @@ import groovy.util.logging.Slf4j
 @EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'sdate', 'edate', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
-class RepoDelta {
+class RepoDelta extends Delta {
 
     DeltaType type
-    String publication
-    String locale
     String sdate
     String edate
-    ProcessId processId
 
     String finalStartDate
     String finalDeltaUrl
