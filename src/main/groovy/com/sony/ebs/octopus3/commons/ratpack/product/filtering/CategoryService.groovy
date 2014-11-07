@@ -53,6 +53,19 @@ class CategoryService {
         })
     }
 
+    rx.Observable<String> retrieveCategoryFeed(String publication, String locale) {
+        rx.Observable.just("starting").flatMap({
+            def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", publication).replace(":locale", locale)
+            log.info "category service url for {} {} is {}", publication, locale, categoryReadUrl
+            httpClient.doGet(categoryReadUrl)
+        }).filter({ Oct3HttpResponse response ->
+            response.isSuccessful("getting octopus category feed", [])
+        }).map({ Oct3HttpResponse response ->
+            def categoryFeed = IOUtils.toString(response.bodyAsStream, EncodingUtil.CHARSET)
+            categoryFeed
+        })
+    }
+
     rx.Observable<Map> filterForCategory(List productUrls, String categoryFeed) {
         observe(execControl.blocking {
             log.info "starting category filtering"
@@ -66,7 +79,8 @@ class CategoryService {
             })
 
             Map filteredCategoryMap = [:]
-            productUrls.each { urnStr ->
+            productUrls.each {
+                String urnStr = it.toString()
                 def sku = new URNImpl(urnStr).values?.last()
                 sku = MaterialNameEncoder.decode(sku)
                 def category = categoryMap[sku]
