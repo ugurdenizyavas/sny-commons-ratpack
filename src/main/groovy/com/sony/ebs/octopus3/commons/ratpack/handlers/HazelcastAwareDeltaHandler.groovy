@@ -69,9 +69,9 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
             delta.status = 400
             def jsonResponse = json(status: 400, errors: errors, delta: delta)
 
-            responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
-
             context.render jsonResponse
+
+            responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
         }
 
     }
