@@ -63,6 +63,10 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
                 ongoingProcesses.remove delta
             }
         } else {
+            log.warn "Validation fails for {}", delta
+            activity.error "{} request is rejected because validation fails", delta
+            context.response.status 400
+            delta.status = 400
             def jsonResponse = json(status: 400, errors: errors, delta: delta)
 
             responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
