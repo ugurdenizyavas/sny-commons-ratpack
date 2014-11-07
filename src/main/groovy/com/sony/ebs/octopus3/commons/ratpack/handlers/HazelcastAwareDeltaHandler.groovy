@@ -50,6 +50,7 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
                 activity.warn "{} request is ignored because there's already an ongoing delta for {}-{}", delta, delta.publication, delta.locale
                 context.response.status 400
                 delta.status = 400
+                errors << ["Duplicate request ignored for delta"]
                 def jsonResponse = json(status: 400, errors: errors, delta: delta)
 
                 responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
@@ -61,6 +62,12 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
                 flowHandle context, delta
                 ongoingProcesses.remove delta
             }
+        } else {
+            def jsonResponse = json(status: 400, errors: errors, delta: delta)
+
+            responseStorage.store(delta.processId.id, [getFlow().toString().toLowerCase(), "delta", delta.publication, delta.locale, delta.processId.id], JsonOutput.toJson(jsonResponse.object))
+
+            context.render jsonResponse
         }
 
     }
