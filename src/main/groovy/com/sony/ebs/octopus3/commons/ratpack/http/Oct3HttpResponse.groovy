@@ -1,6 +1,5 @@
 package com.sony.ebs.octopus3.commons.ratpack.http
 
-import com.ning.http.client.Response
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 
 class Oct3HttpResponse {
@@ -14,11 +13,11 @@ class Oct3HttpResponse {
     }
 
     InputStream getBodyAsStream() {
-        new ByteArrayInputStream(bodyAsBytes)
+        bodyAsBytes ? new ByteArrayInputStream(bodyAsBytes) : null
     }
 
     String getBodyAsText() {
-        new String(bodyAsBytes, EncodingUtil.CHARSET)
+        bodyAsBytes ? new String(bodyAsBytes, EncodingUtil.CHARSET) : null
     }
 
     public boolean isSuccessful(String message, List errors) {
