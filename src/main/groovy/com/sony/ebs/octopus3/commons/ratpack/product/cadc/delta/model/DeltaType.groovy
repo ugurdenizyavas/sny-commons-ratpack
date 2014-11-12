@@ -11,6 +11,7 @@ enum DeltaType {
     category,
     thirdparty,
     archive,
-    flix_sku
+    flix_sku,
+    amazon_feed
 
 }
