@@ -96,7 +96,7 @@ configurations.optional.transitive = false
 //======================================================================
 
 dependencies {
-    compile 'commons-lang:commons-lang:2.4'
+    compile 'commons-lang:commons-lang:2.6'
 
     compile 'com.sony.ebs.octopus3:octopus3-commons:1.4-SNAPSHOT'
 

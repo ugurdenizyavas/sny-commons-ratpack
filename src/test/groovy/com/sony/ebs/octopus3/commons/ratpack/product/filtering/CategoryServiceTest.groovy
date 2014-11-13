@@ -27,6 +27,7 @@ class CategoryServiceTest {
 
     CategoryService categoryService
     StubFor mockHttpClient
+    RepoDelta delta
 
     static ExecController execController
 
@@ -51,6 +52,7 @@ class CategoryServiceTest {
                 octopusCategoryServiceUrl: "/product/publications/:publication/locales/:locale/hierarchies/category",
                 repositoryFileServiceUrl: "/repository/file/:urn")
         mockHttpClient = new StubFor(Oct3HttpClient)
+        delta = new RepoDelta(type: DeltaType.flixMedia, publication: "score", locale: "en_gb")
     }
 
     def runRetrieveCategoryFeed(RepoDelta delta) {
@@ -77,8 +79,8 @@ class CategoryServiceTest {
         def categoryFeed = getFileText("category_ru.xml")
 
         mockHttpClient.demand.with {
-            doGet(1) { String url ->
-                assert url == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
+            doGet(1) {
+                assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
                 rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: categoryFeed.bytes))
             }
             doPost(1) { String url, InputStream is ->
@@ -87,7 +89,6 @@ class CategoryServiceTest {
                 rx.Observable.just(new Oct3HttpResponse(statusCode: 200))
             }
         }
-        def delta = new RepoDelta(type: DeltaType.flixMedia, publication: "SCORE", locale: "en_GB")
         assert runRetrieveCategoryFeed(delta) == categoryFeed
     }
 
@@ -95,12 +96,12 @@ class CategoryServiceTest {
     void "category not found"() {
         mockHttpClient.demand.with {
             doGet(1) {
+                assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
                 rx.Observable.just(new Oct3HttpResponse(statusCode: 500))
             }
         }
         categoryService.httpClient = mockHttpClient.proxyInstance()
 
-        def delta = new RepoDelta(publication: "SCORE", locale: "en_GB")
         assert runRetrieveCategoryFeed(delta) == "outOfFlow"
         assert delta.errors == ["HTTP 500 error getting octopus category feed"]
     }
@@ -109,6 +110,7 @@ class CategoryServiceTest {
     void "could not save"() {
         mockHttpClient.demand.with {
             doGet(1) {
+                assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
                 rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: CATEGORY_FEED.bytes))
             }
             doPost(1) { String url, InputStream is ->
@@ -117,7 +119,6 @@ class CategoryServiceTest {
         }
         categoryService.httpClient = mockHttpClient.proxyInstance()
 
-        def delta = new RepoDelta(publication: "SCORE", locale: "en_GB")
         assert runRetrieveCategoryFeed(delta) == "outOfFlow"
         assert delta.errors == ["HTTP 404 error saving octopus category feed"]
     }
@@ -126,12 +127,12 @@ class CategoryServiceTest {
     void "exception in get"() {
         mockHttpClient.demand.with {
             doGet(1) {
+                assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
                 throw new Exception("error in get")
             }
         }
         categoryService.httpClient = mockHttpClient.proxyInstance()
 
-        def delta = new RepoDelta(publication: "SCORE", locale: "en_GB")
         assert runRetrieveCategoryFeed(delta) == "error"
     }
 
