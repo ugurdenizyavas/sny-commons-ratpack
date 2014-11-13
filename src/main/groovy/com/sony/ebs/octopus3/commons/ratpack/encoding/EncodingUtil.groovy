@@ -6,5 +6,7 @@ class EncodingUtil {
 
     public static final String CHARSET_STR = 'UTF-8'
 
+    static final Locale LOCALE = Locale.US
+
     public static final Charset CHARSET = Charset.forName(CHARSET_STR)
 }

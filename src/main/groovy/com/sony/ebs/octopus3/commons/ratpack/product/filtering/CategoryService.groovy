@@ -2,6 +2,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.filtering
 
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 import com.sony.ebs.octopus3.commons.ratpack.encoding.MaterialNameEncoder
+import com.sony.ebs.octopus3.commons.ratpack.encoding.ProductUtil
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
@@ -34,7 +35,9 @@ class CategoryService {
     rx.Observable<String> retrieveCategoryFeed(RepoDelta delta) {
         String categoryFeed
         rx.Observable.just("starting").flatMap({
-            def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", delta.publication).replace(":locale", delta.locale)
+            def urlPublication = ProductUtil.formatPublication(delta.publication)
+            def urlLocale = ProductUtil.formatLocale(delta.locale)
+            def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", urlPublication).replace(":locale", urlLocale)
             log.info "category service url for {} is {}", delta, categoryReadUrl
             httpClient.doGet(categoryReadUrl)
         }).filter({ Oct3HttpResponse response ->
@@ -53,13 +56,15 @@ class CategoryService {
         })
     }
 
-    rx.Observable<String> retrieveCategoryFeed(String publication, String locale) {
+    rx.Observable<String> retrieveCategoryFeed(String publication, String locale, List errors = []) {
         rx.Observable.just("starting").flatMap({
-            def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", publication).replace(":locale", locale)
+            def urlPublication = ProductUtil.formatPublication(publication)
+            def urlLocale = ProductUtil.formatLocale(locale)
+            def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", urlPublication).replace(":locale", urlLocale)
             log.info "category service url for {} {} is {}", publication, locale, categoryReadUrl
             httpClient.doGet(categoryReadUrl)
         }).filter({ Oct3HttpResponse response ->
-            response.isSuccessful("getting octopus category feed", [])
+            response.isSuccessful("getting octopus category feed", errors)
         }).map({ Oct3HttpResponse response ->
             def categoryFeed = IOUtils.toString(response.bodyAsStream, EncodingUtil.CHARSET)
             categoryFeed
