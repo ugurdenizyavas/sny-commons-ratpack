@@ -56,7 +56,7 @@ class CategoryService {
         })
     }
 
-    rx.Observable<String> retrieveCategoryFeed(String publication, String locale) {
+    rx.Observable<String> retrieveCategoryFeed(String publication, String locale, List errors = []) {
         rx.Observable.just("starting").flatMap({
             def urlPublication = ProductUtil.formatPublication(publication)
             def urlLocale = ProductUtil.formatLocale(locale)
@@ -64,7 +64,7 @@ class CategoryService {
             log.info "category service url for {} {} is {}", publication, locale, categoryReadUrl
             httpClient.doGet(categoryReadUrl)
         }).filter({ Oct3HttpResponse response ->
-            response.isSuccessful("getting octopus category feed", [])
+            response.isSuccessful("getting octopus category feed", errors)
         }).map({ Oct3HttpResponse response ->
             def categoryFeed = IOUtils.toString(response.bodyAsStream, EncodingUtil.CHARSET)
             categoryFeed

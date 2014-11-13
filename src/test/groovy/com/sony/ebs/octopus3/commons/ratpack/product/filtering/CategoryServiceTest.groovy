@@ -75,7 +75,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void "get category feed"() {
+    void "test retrieveCategoryFeed"() {
         def categoryFeed = getFileText("category_ru.xml")
 
         mockHttpClient.demand.with {
@@ -93,7 +93,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void "category not found"() {
+    void "test retrieveCategoryFeed category not found"() {
         mockHttpClient.demand.with {
             doGet(1) {
                 assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
@@ -107,7 +107,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void "could not save"() {
+    void "test retrieveCategoryFeed could not save"() {
         mockHttpClient.demand.with {
             doGet(1) {
                 assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
@@ -124,7 +124,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void "exception in get"() {
+    void "test retrieveCategoryFeed exception in get"() {
         mockHttpClient.demand.with {
             doGet(1) {
                 assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
@@ -134,6 +134,40 @@ class CategoryServiceTest {
         categoryService.httpClient = mockHttpClient.proxyInstance()
 
         assert runRetrieveCategoryFeed(delta) == "error"
+    }
+
+    def runRetrieveCategoryFeedForPublicationAndLocale(String publication, String locale, List errors) {
+        categoryService.httpClient = mockHttpClient.proxyInstance()
+
+        def result = new BlockingVariable<String>(5)
+        boolean valueSet = false
+        execController.start {
+            categoryService.retrieveCategoryFeed(publication, locale, errors).subscribe({
+                valueSet = true
+                result.set(it)
+            }, {
+                log.error "error", it
+                result.set("error")
+            }, {
+                if (!valueSet) result.set("outOfFlow")
+            })
+        }
+        result.get()
+    }
+
+    @Test
+    void "test retrieveCategoryFeed for publication and locale"() {
+        def categoryFeed = getFileText("category_ru.xml")
+
+        mockHttpClient.demand.with {
+            doGet(1) {
+                assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: categoryFeed.bytes))
+            }
+        }
+        categoryService.httpClient = mockHttpClient.proxyInstance()
+
+        assert runRetrieveCategoryFeedForPublicationAndLocale("score", "en_gb", []) == categoryFeed
     }
 
     def runFilterForCategory(List productUrls, String categoryFeed) {
@@ -154,7 +188,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void "filter for category"() {
+    void "test filterForCategory"() {
         def xml = """
 <ProductHierarchy name="category" publication="SCORE" locale="en_GB">
     <node>
