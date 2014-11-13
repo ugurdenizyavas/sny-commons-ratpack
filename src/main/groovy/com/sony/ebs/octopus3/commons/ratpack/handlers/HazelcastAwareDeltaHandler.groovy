@@ -26,6 +26,7 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
 
     def ongoingProcesses
 
+    @Autowired
     HazelcastInstance hazelcastInstance
 
     @Autowired
