@@ -14,7 +14,7 @@ import groovy.util.logging.Slf4j
 @EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'sdate', 'edate', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
-class RepoDelta extends Delta {
+class RepoDelta extends Delta implements Serializable {
 
     DeltaType type
     String sdate
