@@ -32,6 +32,11 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
     @Autowired
     ResponseStorage responseStorage
 
+    void finalizeInAsyncThread(delta) {
+        ongoingProcesses.remove delta.ticket
+        log.info "Process {} is removed from ongoing processes. Remaining processes are {}", delta, ongoingProcesses
+    }
+
     /**
      * Handle Hazelcast Delta specific operation
      */
@@ -46,7 +51,7 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
         if (!errors) {
             ongoingProcesses = populateOngoingProcesses()
 
-            if (delta in ongoingProcesses) {
+            if (delta.ticket in ongoingProcesses) {
                 log.warn "Duplicate request ignored for delta {}", delta
                 activity.warn "{} request is ignored because there's already an ongoing delta for {}-{}", delta, delta.publication, delta.locale
                 context.response.status 400
@@ -58,10 +63,8 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
 
                 context.render jsonResponse
             } else {
-                ongoingProcesses << delta
-                //do flow specific handle operations
+                ongoingProcesses << delta.ticket
                 flowHandle context, delta
-                ongoingProcesses.remove delta
             }
         } else {
             log.warn "Validation fails for {}", delta
