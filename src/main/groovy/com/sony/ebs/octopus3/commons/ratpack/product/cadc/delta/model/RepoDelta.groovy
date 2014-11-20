@@ -19,6 +19,7 @@ class RepoDelta extends Delta implements Serializable {
     DeltaType type
     String sdate
     String edate
+    boolean upload
 
     String finalStartDate
     String finalDeltaUrl
