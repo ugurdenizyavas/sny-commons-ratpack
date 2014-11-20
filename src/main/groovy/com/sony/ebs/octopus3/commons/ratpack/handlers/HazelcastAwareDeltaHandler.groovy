@@ -11,7 +11,6 @@ import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service.DeltaRes
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Autowired
 import ratpack.groovy.handling.GroovyContext
 import ratpack.groovy.handling.GroovyHandler
 import ratpack.jackson.JsonRender
@@ -28,13 +27,8 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
 
     def ongoingProcesses
 
-    @Autowired
     HazelcastInstance hazelcastInstance
-
-    @Autowired
     ResponseStorage responseStorage
-
-    @Autowired
     DeltaResultService deltaResultService
 
     void finalizeInAsyncThread(delta) {
