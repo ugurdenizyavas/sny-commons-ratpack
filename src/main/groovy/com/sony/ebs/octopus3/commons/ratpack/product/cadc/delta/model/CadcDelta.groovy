@@ -10,8 +10,8 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'since', 'cadcUrl', 'processId'])
-@EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'since', 'cadcUrl', 'processId'])
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true,excludes = ['urlList'])
+@EqualsAndHashCode(excludes = ['urlList'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
 class CadcDelta {

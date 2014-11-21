@@ -9,8 +9,8 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'url', 'materialName', 'processId'])
-@EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'url', 'materialName', 'processId'])
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true)
+@EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
 class CadcProduct {

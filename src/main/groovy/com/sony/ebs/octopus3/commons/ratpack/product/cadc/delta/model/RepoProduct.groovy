@@ -9,7 +9,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-@ToString(includeNames = true, includePackage = false, ignoreNulls = true, includes = ['type', 'publication', 'locale', 'sku', 'eanCode','processId'])
+@ToString(includeNames = true, includePackage = false, ignoreNulls = true)
 @EqualsAndHashCode(includes = ['type', 'publication', 'locale', 'materialName', 'processId'])
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Slf4j
@@ -21,6 +21,8 @@ class RepoProduct {
     String sku
     String processId
     String eanCode
+    String category
+    boolean upload
 
     @JsonIgnore
     List errors = []
