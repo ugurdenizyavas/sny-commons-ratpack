@@ -23,6 +23,8 @@ class RepoDelta extends Delta implements Serializable {
 
     String finalStartDate
     String finalDeltaUrl
+
+    @JsonIgnore
     List deltaUrns
 
     @JsonIgnore
