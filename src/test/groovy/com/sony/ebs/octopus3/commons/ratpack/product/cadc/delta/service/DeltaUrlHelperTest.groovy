@@ -1,11 +1,11 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.file.FileAttribute
 import com.sony.ebs.octopus3.commons.ratpack.file.FileAttributesProvider
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.mock.interceptor.StubFor
@@ -47,7 +47,7 @@ class DeltaUrlHelperTest {
         mockHttpClient = new StubFor(Oct3HttpClient)
         mockFileAttributesProvider = new StubFor(FileAttributesProvider)
 
-        delta = new CadcDelta(type: DeltaType.global_sku, publication: "SCORE", locale: "fr_BE")
+        delta = new CadcDelta(type: RepoValue.global_sku, publication: "SCORE", locale: "fr_BE")
     }
 
     def runUpdateLastModified() {
@@ -105,7 +105,7 @@ class DeltaUrlHelperTest {
     def runCreateSinceValue(String since) {
         deltaUrlHelper.fileAttributesProvider = mockFileAttributesProvider.proxyInstance()
 
-        def delta = new CadcDelta(type: DeltaType.global_sku ,publication: "SCORE", locale: "fr_BE", cadcUrl: "http://cadc", since: since)
+        def delta = new CadcDelta(type: RepoValue.global_sku ,publication: "SCORE", locale: "fr_BE", cadcUrl: "http://cadc", since: since)
 
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false

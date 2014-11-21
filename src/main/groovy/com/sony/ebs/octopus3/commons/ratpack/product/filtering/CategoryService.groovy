@@ -1,11 +1,11 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.filtering
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 import com.sony.ebs.octopus3.commons.ratpack.encoding.MaterialNameEncoder
 import com.sony.ebs.octopus3.commons.ratpack.encoding.ProductUtil
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
@@ -29,7 +29,7 @@ class CategoryService {
     Oct3HttpClient httpClient
 
     URN getCategoryUrn(RepoDelta delta) {
-        new URNImpl(delta.type.toString(), [delta.publication, delta.locale, DeltaType.category.toString() + ".xml"])
+        new URNImpl(delta.type.toString(), [delta.publication, delta.locale, RepoValue.category.toString() + ".xml"])
     }
 
     rx.Observable<String> retrieveCategoryFeed(RepoDelta delta) {

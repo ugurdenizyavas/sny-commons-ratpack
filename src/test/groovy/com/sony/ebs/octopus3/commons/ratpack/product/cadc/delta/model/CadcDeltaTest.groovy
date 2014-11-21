@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import org.junit.Before
 import org.junit.Test
 
@@ -9,7 +10,7 @@ class CadcDeltaTest {
 
     @Before
     void before() {
-        delta = new CadcDelta(type: DeltaType.flix_sku, publication: "SCORE", locale: "en_GB")
+        delta = new CadcDelta(type: RepoValue.flix_sku, publication: "SCORE", locale: "en_GB")
     }
 
     @Test

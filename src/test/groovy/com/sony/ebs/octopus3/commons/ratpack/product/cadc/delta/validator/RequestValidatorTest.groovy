@@ -1,8 +1,8 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import org.junit.Before
@@ -19,10 +19,10 @@ class RequestValidatorTest {
     @Before
     void before() {
         validator = new RequestValidator()
-        cadcDelta = new CadcDelta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
-        cadcProduct = new CadcProduct(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
-        repoDelta = new RepoDelta(type: DeltaType.global_sheet, publication: "GLOBAL", locale: "en_GB")
-        repoProduct = new RepoProduct(type: DeltaType.global_sheet, publication: "SCORE", locale: "en_GB", sku: "a")
+        cadcDelta = new CadcDelta(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
+        cadcProduct = new CadcProduct(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
+        repoDelta = new RepoDelta(type: RepoValue.global_sheet, publication: "GLOBAL", locale: "en_GB")
+        repoProduct = new RepoProduct(type: RepoValue.global_sheet, publication: "SCORE", locale: "en_GB", sku: "a")
     }
 
     @Test

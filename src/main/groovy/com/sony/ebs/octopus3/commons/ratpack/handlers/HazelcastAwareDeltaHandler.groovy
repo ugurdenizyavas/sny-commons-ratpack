@@ -3,11 +3,14 @@ package com.sony.ebs.octopus3.commons.ratpack.handlers
 import com.hazelcast.core.HazelcastInstance
 import com.sony.ebs.octopus3.commons.flows.Delta
 import com.sony.ebs.octopus3.commons.flows.FlowTypeEnum
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.flows.ServiceTypeEnum
 import com.sony.ebs.octopus3.commons.process.ProcessIdImpl
 import com.sony.ebs.octopus3.commons.ratpack.file.ResponseStorage
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaResult
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service.DeltaResultService
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator.RequestValidator
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.joda.time.DateTime
@@ -30,6 +33,19 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
     HazelcastInstance hazelcastInstance
     ResponseStorage responseStorage
     DeltaResultService deltaResultService
+    RequestValidator validator
+
+    abstract RepoValue getDeltaType()
+
+    abstract FlowTypeEnum getFlowType()
+
+    abstract D createDelta(GroovyContext context)
+
+    abstract void flowHandle(GroovyContext context, D delta)
+
+    List flowValidate(GroovyContext context, D delta) {
+        validator.validateRepoDelta(delta)
+    }
 
     void finalizeInAsyncThread(delta) {
         ongoingProcesses.remove delta.ticket
@@ -41,8 +57,19 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
      */
     @Override
     final void handle(GroovyContext context) {
-        //TODO: Reformat URL in context to derive below parameters from URL
-        D delta = createDelta(new ProcessIdImpl(context.request.queryParams['pid']), getFlow(), ServiceTypeEnum.DELTA, getPublication(context), getLocale(context))
+        D delta = createDelta(context)
+        delta.with {
+            processId = new ProcessIdImpl(context.request.queryParams.pid)
+            flow = flowType
+            service = ServiceTypeEnum.DELTA
+            type = deltaType
+            publication = context.pathTokens.publication
+            locale = context.pathTokens.locale
+            upload = context.request.queryParams.upload as boolean
+            sdate = context.request.queryParams.sdate
+            edate = context.request.queryParams.edate
+        }
+
         activity.info "Starting delta feed generation for {}", delta
 
         //Validate context according to its flow; continue if there is no error
@@ -118,35 +145,4 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
         }
     }
 
-    /**
-     * Gets flow type of service
-     * @return
-     */
-    abstract FlowTypeEnum getFlow()
-
-    /**
-     * Gets publication from request
-     */
-    abstract String getPublication(GroovyContext context)
-
-    /**
-     * Gets locale from request
-     */
-    abstract String getLocale(GroovyContext context)
-
-    /**
-     * Validates request
-     * @return list of errors
-     */
-    abstract List flowValidate(GroovyContext context, D delta)
-
-    /**
-     * Handle flow specific operations
-     */
-    abstract void flowHandle(GroovyContext context, D delta)
-
-    /**
-     * Creates a delta object of type D
-     */
-    abstract D createDelta(ProcessIdImpl processId, FlowTypeEnum flowTypeEnum, ServiceTypeEnum serviceTypeEnum, String publication, String locale)
 }

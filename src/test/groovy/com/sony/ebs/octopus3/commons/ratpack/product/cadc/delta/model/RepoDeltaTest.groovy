@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import org.junit.Before
 import org.junit.Test
 
@@ -9,7 +10,7 @@ class RepoDeltaTest {
 
     @Before
     void before() {
-        delta = new RepoDelta(type: DeltaType.flixMedia, publication: "SCORE", locale: "en_GB")
+        delta = new RepoDelta(type: RepoValue.flixMedia, publication: "SCORE", locale: "en_GB")
     }
 
     @Test
@@ -19,7 +20,7 @@ class RepoDeltaTest {
 
     @Test
     void "getUrnForType"() {
-        assert delta.getUrnForType(DeltaType.flix_sku).toString() == "urn:flix_sku:score:en_gb"
+        assert delta.getUrnForType(RepoValue.flix_sku).toString() == "urn:flix_sku:score:en_gb"
     }
 
     @Test

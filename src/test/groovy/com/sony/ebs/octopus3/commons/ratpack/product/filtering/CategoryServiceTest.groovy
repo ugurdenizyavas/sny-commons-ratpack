@@ -1,9 +1,9 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.filtering
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
@@ -52,7 +52,7 @@ class CategoryServiceTest {
                 octopusCategoryServiceUrl: "/product/publications/:publication/locales/:locale/hierarchies/category",
                 repositoryFileServiceUrl: "/repository/file/:urn")
         mockHttpClient = new StubFor(Oct3HttpClient)
-        delta = new RepoDelta(type: DeltaType.flixMedia, publication: "score", locale: "en_gb")
+        delta = new RepoDelta(type: RepoValue.flixMedia, publication: "score", locale: "en_gb")
     }
 
     def runRetrieveCategoryFeed(RepoDelta delta) {

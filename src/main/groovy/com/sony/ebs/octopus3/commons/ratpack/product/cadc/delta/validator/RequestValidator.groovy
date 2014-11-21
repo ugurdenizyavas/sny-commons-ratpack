@@ -1,6 +1,7 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
 import com.sony.ebs.octopus3.commons.date.ISODateUtils
+import com.sony.ebs.octopus3.commons.flows.Delta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
@@ -82,7 +83,7 @@ class RequestValidator {
         errors
     }
 
-    List validateRepoDelta(RepoDelta delta) {
+    List validateRepoDelta(Delta delta) {
         List errors = []
 
         if (!delta.type) {
