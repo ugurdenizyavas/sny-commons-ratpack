@@ -83,7 +83,7 @@ class RequestValidator {
         errors
     }
 
-    List validateRepoDelta(Delta delta) {
+    List validateDelta(Delta delta) {
         List errors = []
 
         if (!delta.type) {

@@ -175,7 +175,7 @@ class RequestValidatorTest {
 
     @Test
     void "validate deltaRepo"() {
-        assert !validator.validateRepoDelta(repoDelta)
+        assert !validator.validateDelta(repoDelta)
     }
 
     @Test
@@ -183,7 +183,7 @@ class RequestValidatorTest {
         repoDelta.with {
             type = null
         }
-        assert validator.validateRepoDelta(repoDelta) == ["type parameter is invalid"]
+        assert validator.validateDelta(repoDelta) == ["type parameter is invalid"]
     }
 
     @Test
@@ -191,7 +191,7 @@ class RequestValidatorTest {
         repoDelta.with {
             sdate = "2014-07-09T00:00:00.000Z"
         }
-        assert !validator.validateRepoDelta(repoDelta)
+        assert !validator.validateDelta(repoDelta)
     }
 
     @Test
@@ -199,7 +199,7 @@ class RequestValidatorTest {
         repoDelta.with {
             sdate = "s1"
         }
-        assert validator.validateRepoDelta(repoDelta) == ["sdate parameter is invalid"]
+        assert validator.validateDelta(repoDelta) == ["sdate parameter is invalid"]
     }
 
     @Test
@@ -207,7 +207,7 @@ class RequestValidatorTest {
         repoDelta.with {
             edate = "2014-07-09T00:00:00.000Z"
         }
-        assert !validator.validateRepoDelta(repoDelta)
+        assert !validator.validateDelta(repoDelta)
     }
 
     @Test
@@ -215,7 +215,7 @@ class RequestValidatorTest {
         repoDelta.with {
             edate = "s2"
         }
-        assert validator.validateRepoDelta(repoDelta) == ["edate parameter is invalid"]
+        assert validator.validateDelta(repoDelta) == ["edate parameter is invalid"]
     }
 
     @Test
