@@ -1,6 +1,7 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service
 
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaResult
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.ProductResult
 import org.joda.time.DateTime
 import org.junit.Before
 import org.junit.Test
@@ -31,8 +32,9 @@ class DeltaResultServiceTest {
     }
 
     @Test
-    void "createProductResultWithErrors"() {
-        def ren = deltaResultService.createProductResultWithErrors(product, errors, startTime, endTime)?.object
+    void "createProductResult with errors"() {
+        def errors = ["err1", "err2"]
+        def ren = deltaResultService.createProductResult(product, new ProductResult(errors: errors), startTime, endTime)?.object
         assert ren.status == 500
         assert ren.product == product
         assert ren.errors == errors
@@ -41,10 +43,11 @@ class DeltaResultServiceTest {
 
     @Test
     void "createProductResult"() {
-        def ren = deltaResultService.createProductResult(product, "done", startTime, endTime)?.object
+        def result = new ProductResult(inputUrn: "urn:a:b")
+        def ren = deltaResultService.createProductResult(product, result, startTime, endTime)?.object
         assert ren.status == 200
         assert ren.product == product
-        assert ren.result == "done"
+        assert ren.result.inputUrn == result.inputUrn
         assert !ren.errors
         assert ren.timeStats
     }

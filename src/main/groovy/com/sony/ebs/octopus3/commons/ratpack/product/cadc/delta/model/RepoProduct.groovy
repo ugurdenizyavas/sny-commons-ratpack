@@ -20,12 +20,8 @@ class RepoProduct {
     String locale
     String sku
     String processId
-    String eanCode
     String category
     boolean upload
-
-    @JsonIgnore
-    List errors = []
 
     @JsonIgnore
     URN getUrn() {

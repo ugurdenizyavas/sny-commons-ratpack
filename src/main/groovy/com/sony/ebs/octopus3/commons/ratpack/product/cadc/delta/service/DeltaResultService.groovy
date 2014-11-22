@@ -2,6 +2,7 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.service
 
 import com.sony.ebs.octopus3.commons.ratpack.handlers.HandlerUtil
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaResult
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.ProductResult
 import org.joda.time.DateTime
 import ratpack.jackson.JsonRender
 
@@ -13,14 +14,13 @@ class DeltaResultService {
         json(status: 400, errors: errors, product: product)
     }
 
-    JsonRender createProductResultWithErrors(Object product, List<String> errors, DateTime startTime, DateTime endTime) {
+    JsonRender createProductResult(Object product, ProductResult result, DateTime startTime, DateTime endTime) {
         def timeStats = HandlerUtil.getTimeStats(startTime, endTime)
-        json(status: 500, timeStats: timeStats, errors: errors, product: product)
-    }
-
-    JsonRender createProductResult(Object product, Object result, DateTime startTime, DateTime endTime) {
-        def timeStats = HandlerUtil.getTimeStats(startTime, endTime)
-        json(status: 200, timeStats: timeStats, result: result, product: product)
+        if (result.errors) {
+            json(status: 500, timeStats: timeStats, errors: result.errors, result: result, product: product)
+        } else {
+            json(status: 200, timeStats: timeStats, result: result, product: product)
+        }
     }
 
     JsonRender createDeltaResultInvalid(Object delta, List<String> errors) {
