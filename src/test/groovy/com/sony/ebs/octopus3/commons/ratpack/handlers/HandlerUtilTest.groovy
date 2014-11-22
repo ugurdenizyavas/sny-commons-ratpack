@@ -53,4 +53,9 @@ class HandlerUtilTest {
         assert null == HandlerUtil.getErrorMessage(new Exception("", new Exception()))
     }
 
+    @Test
+    void "test add process id"() {
+        assert "//a?processId=123" == HandlerUtil.addProcessId("//a", "123")
+    }
+
 }

@@ -1,5 +1,9 @@
 package com.sony.ebs.octopus3.commons.ratpack.handlers
 
+import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
+import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
+import groovy.json.JsonSlurper
+import org.apache.http.client.utils.URIBuilder
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
@@ -8,6 +12,8 @@ import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 
 class HandlerUtil {
+
+    final static JsonSlurper jsonSlurper = new JsonSlurper()
 
     static PeriodFormatter PERIOD_FORMATTER = new PeriodFormatterBuilder()
             .printZeroAlways()
@@ -41,4 +47,22 @@ class HandlerUtil {
         ]
     }
 
+    static String addProcessId(String initialUrl, String processId) {
+        new URIBuilder(initialUrl).with {
+            if (processId) {
+                addParameter("processId", processId)
+            }
+            it.toString()
+        }
+    }
+
+    static Object parseOct3ResponseQuiet(Oct3HttpResponse response) {
+        def json
+        try {
+            json = jsonSlurper.parse(response.bodyAsStream, EncodingUtil.CHARSET_STR)
+        } catch (all) {
+            json = [:]
+        }
+        json
+    }
 }

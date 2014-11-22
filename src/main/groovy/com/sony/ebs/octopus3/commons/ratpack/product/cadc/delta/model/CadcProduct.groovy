@@ -23,9 +23,6 @@ class CadcProduct {
     String processId
 
     @JsonIgnore
-    List errors = []
-
-    @JsonIgnore
     URN getUrn() {
         new URNImpl(type?.toString(), [publication, locale, materialName])
     }
