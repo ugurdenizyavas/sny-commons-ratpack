@@ -39,8 +39,8 @@ class DeltaResultService {
     JsonRender createDeltaResult(Object delta, DeltaResult result, DateTime startTime, DateTime endTime) {
         int sum = (result.categoryFilteredOutUrns?.size() ?: 0) + (result.eanCodeFilteredOutUrns?.size() ?: 0) + (result.successfulUrns?.size() ?: 0) + (result.unsuccessfulUrns?.size() ?: 0)
         def resultMap = [
-                productErrors: result.productErrors,
-                stats        : [
+                productErrors : result.productErrors,
+                stats         : [
                         "number of delta products"                   : result.deltaUrns?.size(),
                         "number of products filtered out by category": result.categoryFilteredOutUrns?.size(),
                         "number of products filtered out by ean code": result.eanCodeFilteredOutUrns?.size(),
@@ -48,14 +48,16 @@ class DeltaResultService {
                         "number of unsuccessful"                     : result.unsuccessfulUrns?.size(),
                         "sum"                                        : sum
                 ],
-                urns         : [
+                urns          : [
                         deltaUrns              : result.deltaUrns,
                         categoryFilteredOutUrns: result.categoryFilteredOutUrns,
                         eanCodeFilteredOutUrns : result.eanCodeFilteredOutUrns,
                         successfulUrns         : result.successfulUrns,
                         unsuccessfulUrns       : result.unsuccessfulUrns
                 ],
-                other        : result.other
+                other         : result.other,
+                finalStartDate: result.finalStartDate,
+                finalDeltaUrl : result.finalDeltaUrl
         ]
 
         def timeStats = HandlerUtil.getTimeStats(startTime, endTime)

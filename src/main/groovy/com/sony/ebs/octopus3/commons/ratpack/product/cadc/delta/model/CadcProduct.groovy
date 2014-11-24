@@ -19,20 +19,11 @@ class CadcProduct {
     String publication
     String locale
     String url
-    String materialName
     String processId
 
     @JsonIgnore
-    URN getUrn() {
-        new URNImpl(type?.toString(), [publication, locale, materialName])
-    }
-
-    URN getUrnForType(RepoValue prmType) {
-        new URNImpl(prmType?.toString(), [publication, locale, materialName])
-    }
-
-    URN getUrnForSubType(RepoValue prmSubType) {
-        new URNImpl(type?.toString(), [prmSubType?.toString(), publication, locale, materialName])
+    URN getOutputUrn(String sku) {
+        new URNImpl(type?.toString(), [publication, locale, sku])
     }
 
 }

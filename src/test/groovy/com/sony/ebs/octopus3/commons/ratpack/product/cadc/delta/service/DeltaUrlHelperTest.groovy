@@ -6,6 +6,7 @@ import com.sony.ebs.octopus3.commons.ratpack.file.FileAttributesProvider
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaResult
 import com.sony.ebs.octopus3.commons.urn.URN
 import com.sony.ebs.octopus3.commons.urn.URNImpl
 import groovy.mock.interceptor.StubFor
@@ -24,7 +25,7 @@ class DeltaUrlHelperTest {
     DeltaUrlHelper deltaUrlHelper
 
     StubFor mockHttpClient, mockFileAttributesProvider
-    CadcDelta delta
+    DeltaResult deltaResult
 
     static ExecController execController
 
@@ -47,16 +48,17 @@ class DeltaUrlHelperTest {
         mockHttpClient = new StubFor(Oct3HttpClient)
         mockFileAttributesProvider = new StubFor(FileAttributesProvider)
 
-        delta = new CadcDelta(type: RepoValue.global_sku, publication: "SCORE", locale: "fr_BE")
+        deltaResult = new DeltaResult()
     }
 
     def runUpdateLastModified() {
+        def delta = new CadcDelta(type: RepoValue.global_sku, publication: "SCORE", locale: "fr_BE")
         deltaUrlHelper.httpClient = mockHttpClient.proxyInstance()
 
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false
         execController.start {
-            deltaUrlHelper.updateLastModified(delta.lastModifiedUrn, delta.errors).subscribe({
+            deltaUrlHelper.updateLastModified(delta.lastModifiedUrn, deltaResult.errors).subscribe({
                 valueSet = true
                 result.set(it)
             }, {
@@ -89,7 +91,7 @@ class DeltaUrlHelperTest {
             }
         }
         assert runUpdateLastModified() == "outOfFlow"
-        assert delta.errors == ["HTTP 500 error updating last modified date"]
+        assert deltaResult.errors == ["HTTP 500 error updating last modified date"]
     }
 
     @Test

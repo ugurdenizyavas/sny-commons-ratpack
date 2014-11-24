@@ -23,22 +23,9 @@ class CadcDelta {
     String cadcUrl
     ProcessId processId
 
-    String finalSince
-    String finalCadcUrl
-
-    @JsonIgnore
-    List urlList
-
-    @JsonIgnore
-    List errors = []
-
     @JsonIgnore
     URN getLastModifiedUrn() {
         new URNImpl(type?.toString(), [RepoValue.last_modified.toString(), publication, locale])
-    }
-
-    URN getUrnForType(RepoValue prmType) {
-        new URNImpl(prmType?.toString(), [publication, locale])
     }
 
 }

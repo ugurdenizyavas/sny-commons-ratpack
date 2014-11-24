@@ -84,7 +84,9 @@ class DeltaResultServiceTest {
                 successfulUrns: ["f", "g", "h"],
                 unsuccessfulUrns: ["j", "k"],
                 productErrors: [a: 1],
-                other: [b: 2]
+                other: [b: 2],
+                finalDeltaUrl: "//delta",
+                finalStartDate: "s1"
         )
 
         def ren = deltaResultService.createDeltaResult(delta, deltaResult, startTime, endTime)?.object
@@ -108,5 +110,7 @@ class DeltaResultServiceTest {
 
         assert ren.result.productErrors == [a: 1]
         assert ren.result.other == [b: 2]
+        assert ren.result.finalDeltaUrl == "//delta"
+        assert ren.result.finalStartDate == "s1"
     }
 }

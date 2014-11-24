@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -18,5 +19,14 @@ class DeltaResult {
     List<String> unsuccessfulUrns
     Map productErrors
     Map other
+
+    String finalStartDate
+    String finalDeltaUrl
+
+    @JsonIgnore
+    List<String> deltaUrls
+
+    @JsonIgnore
+    List<String> errors = []
 
 }
