@@ -14,6 +14,8 @@ import groovy.util.logging.Slf4j
 @Slf4j
 class ProductResult {
 
+    String sku
+
     String inputUrn
     String inputUrl
     String outputUrn
@@ -26,5 +28,7 @@ class ProductResult {
 
     @JsonIgnore
     List<String> errors = []
+
+    Map other
 
 }
