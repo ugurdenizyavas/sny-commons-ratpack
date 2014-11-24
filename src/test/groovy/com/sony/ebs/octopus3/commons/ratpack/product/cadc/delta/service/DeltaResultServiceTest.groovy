@@ -34,11 +34,15 @@ class DeltaResultServiceTest {
     @Test
     void "createProductResult with errors"() {
         def errors = ["err1", "err2"]
-        def ren = deltaResultService.createProductResult(product, new ProductResult(errors: errors), startTime, endTime)?.object
+        def result = new ProductResult(inputUrn: "urn:a:b", errors: errors)
+        def ren = deltaResultService.createProductResult(product, result, startTime, endTime)?.object
         assert ren.status == 500
         assert ren.product == product
         assert ren.errors == errors
         assert ren.timeStats
+        assert ren.result.inputUrn == result.inputUrn
+        assert ren.result.statusCode == 500
+        assert ren.result.success == false
     }
 
     @Test
@@ -48,6 +52,8 @@ class DeltaResultServiceTest {
         assert ren.status == 200
         assert ren.product == product
         assert ren.result.inputUrn == result.inputUrn
+        assert ren.result.statusCode == 200
+        assert ren.result.success == true
         assert !ren.errors
         assert ren.timeStats
     }

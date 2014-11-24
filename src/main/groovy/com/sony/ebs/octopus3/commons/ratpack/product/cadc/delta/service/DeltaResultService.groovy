@@ -17,8 +17,12 @@ class DeltaResultService {
     JsonRender createProductResult(Object product, ProductResult result, DateTime startTime, DateTime endTime) {
         def timeStats = HandlerUtil.getTimeStats(startTime, endTime)
         if (result.errors) {
+            result.success = false
+            result.statusCode = 500
             json(status: 500, timeStats: timeStats, errors: result.errors, result: result, product: product)
         } else {
+            result.success = true
+            result.statusCode = 200
             json(status: 200, timeStats: timeStats, result: result, product: product)
         }
     }

@@ -20,6 +20,8 @@ class ProductResult {
     String inputUrl
     String outputUrn
     String outputUrl
+    String archiveUrn
+    String archiveUrl
 
     int statusCode
     boolean success
