@@ -106,8 +106,7 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
     }
 
     void storeResponse(Delta delta, JsonRender jsonRender) {
-        def urnValues = [delta.flow?.toString()?.toLowerCase(), delta.service?.toString()?.toLowerCase(), delta.publication, delta.locale, delta.processId?.id]
-        responseStorage.store(delta.processId?.id, urnValues, JsonOutput.toJson(jsonRender.object))
+        responseStorage.store(delta, JsonOutput.toJson(jsonRender.object))
     }
 
     JsonRender processError(Delta delta, List<String> errors, DateTime startTime) {
