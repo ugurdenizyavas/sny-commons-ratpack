@@ -32,30 +32,19 @@ class DeltaUrlHelper {
         })
     }
 
-    rx.Observable<String> createCadcDeltaUrl(String cadcUrl, String locale, String since) {
+    rx.Observable<String> createCadcDeltaUrl(String cadcUrl, String locale, String sdate) {
         observe(execControl.blocking({
             def url
-            if (!since || since.equalsIgnoreCase("all")) {
+            if (!sdate || sdate.equalsIgnoreCase("all")) {
                 url = new URIBuilder("$cadcUrl/$locale").toString()
             } else {
                 def urlBuilder = new URIBuilder("$cadcUrl/changes/$locale")
-                urlBuilder.addParameter("since", since)
+                urlBuilder.addParameter("since", sdate)
                 url = urlBuilder.toString()
             }
-            log.info "url inner for locale {} and since {} is {}", locale, since, url
+            log.info "url inner for locale {} and sdate {} is {}", locale, sdate, url
             url
         }))
-    }
-
-    rx.Observable<String> createSinceValue(String since, URN lastModifiedUrn) {
-        if (since) {
-            rx.Observable.just(since)
-        } else {
-            fileAttributesProvider.getLastModifiedTime(lastModifiedUrn)
-                    .map({ result ->
-                result.found ? result.value : ""
-            })
-        }
     }
 
     rx.Observable<String> createRepoDeltaUrl(String initialUrl, String sdate, String edate) {

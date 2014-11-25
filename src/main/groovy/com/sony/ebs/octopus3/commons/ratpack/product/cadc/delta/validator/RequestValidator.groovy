@@ -73,8 +73,8 @@ class RequestValidator {
         validatePublication(delta.publication, errors)
         validateLocale(delta.locale, errors)
 
-        if (delta.since && !delta.since.equalsIgnoreCase("all")) {
-            validateDate("since", delta.since, errors)
+        if (delta.sdate && !delta.sdate.equalsIgnoreCase("all")) {
+            validateDate("sdate", delta.sdate, errors)
         }
 
         if (!validateUrl(delta.cadcUrl)) {
