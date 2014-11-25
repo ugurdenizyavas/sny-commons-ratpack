@@ -21,11 +21,16 @@ class RepoProduct {
     String sku
     String processId
     String category
+    String environment
     boolean upload
 
     @JsonIgnore
     URN getUrn() {
-        new URNImpl(type?.toString(), [publication, locale, sku])
+        if (type == RepoValue.category) {
+            new URNImpl(type?.toString(), [environment, publication, locale])
+        } else {
+            new URNImpl(type?.toString(), [publication, locale, sku])
+        }
     }
 
     URN getUrnForType(RepoValue prmType) {
