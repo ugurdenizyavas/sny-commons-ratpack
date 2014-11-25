@@ -7,8 +7,8 @@ import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduc
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import groovy.util.logging.Slf4j
+import groovyx.net.http.URIBuilder
 import org.apache.commons.lang.LocaleUtils
-import org.apache.http.client.utils.URIBuilder
 
 @Slf4j
 class RequestValidator {

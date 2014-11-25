@@ -5,7 +5,7 @@ import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.urn.URN
 import groovy.util.logging.Slf4j
-import org.apache.http.client.utils.URIBuilder
+import groovyx.net.http.URIBuilder
 import ratpack.exec.ExecControl
 
 import static ratpack.rx.RxRatpack.observe
@@ -39,7 +39,7 @@ class DeltaUrlHelper {
                 url = new URIBuilder("$cadcUrl/$locale").toString()
             } else {
                 def urlBuilder = new URIBuilder("$cadcUrl/changes/$locale")
-                urlBuilder.addParameter("since", sdate)
+                urlBuilder.addQueryParam("since", sdate)
                 url = urlBuilder.toString()
             }
             log.info "url inner for locale {} and sdate {} is {}", locale, sdate, url
@@ -52,7 +52,7 @@ class DeltaUrlHelper {
             def uriBuilder = new URIBuilder(initialUrl)
             def addDate = { String name, String value ->
                 if (value)
-                    uriBuilder.addParameter(name, value)
+                    uriBuilder.addQueryParam(name, value)
             }
             addDate("sdate", sdate)
             addDate("edate", edate)
