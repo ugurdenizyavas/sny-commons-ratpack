@@ -104,64 +104,11 @@ class DeltaUrlHelperTest {
         assert runUpdateLastModified() == "error"
     }
 
-    def runCreateSinceValue(String since) {
-        deltaUrlHelper.fileAttributesProvider = mockFileAttributesProvider.proxyInstance()
-
-        def delta = new CadcDelta(type: RepoValue.global_sku ,publication: "SCORE", locale: "fr_BE", cadcUrl: "http://cadc", since: since)
-
+    def runCreateCadcDeltaUrl(String sdate) {
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false
         execController.start {
-            deltaUrlHelper.createSinceValue(delta.since, delta.lastModifiedUrn).subscribe({
-                valueSet = true
-                result.set(it)
-            }, {
-                log.error "error", it
-                result.set("error")
-            }, {
-                if (!valueSet) result.set("outOfFlow")
-            })
-        }
-        result.get()
-    }
-
-    @Test
-    void "create delta with value"() {
-        assert runCreateSinceValue("2014-07-17T14:35:25.089+03:00") == "2014-07-17T14:35:25.089+03:00"
-    }
-
-    @Test
-    void "create since with value all"() {
-        assert runCreateSinceValue("All") == "All"
-    }
-
-    @Test
-    void "create since last modified found"() {
-        mockFileAttributesProvider.demand.with {
-            getLastModifiedTime(1) { URN urn ->
-                assert urn.toString() == "urn:global_sku:last_modified:score:fr_be"
-                rx.Observable.just(new FileAttribute(found: true, value: "s1"))
-            }
-        }
-        assert runCreateSinceValue(null) == "s1"
-    }
-
-    @Test
-    void "create since last modified not found"() {
-        mockFileAttributesProvider.demand.with {
-            getLastModifiedTime(1) { URN urn ->
-                assert urn.toString() == "urn:global_sku:last_modified:score:fr_be"
-                rx.Observable.just(new FileAttribute(found: false))
-            }
-        }
-        assert runCreateSinceValue(null) == ""
-    }
-
-    def runCreateCadcDeltaUrl(String since) {
-        def result = new BlockingVariable<String>(5)
-        boolean valueSet = false
-        execController.start {
-            deltaUrlHelper.createCadcDeltaUrl("http://cadc/delta", "fr_BE", since).subscribe({
+            deltaUrlHelper.createCadcDeltaUrl("http://cadc/delta", "fr_BE", sdate).subscribe({
                 valueSet = true
                 result.set(it)
             }, {
@@ -217,6 +164,11 @@ class DeltaUrlHelperTest {
     @Test
     void "create start date existing"() {
         assert runCreateStartDate("2014-07-17T14:35:25.089+03:00") == "2014-07-17T14:35:25.089+03:00"
+    }
+
+    @Test
+    void "create start date with value all"() {
+        assert runCreateStartDate("All") == "All"
     }
 
     @Test

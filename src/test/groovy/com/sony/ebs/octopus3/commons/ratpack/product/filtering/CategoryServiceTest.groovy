@@ -4,6 +4,7 @@ import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
+import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaResult
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import groovy.mock.interceptor.StubFor
 import groovy.util.logging.Slf4j
@@ -28,6 +29,7 @@ class CategoryServiceTest {
     CategoryService categoryService
     StubFor mockHttpClient
     RepoDelta delta
+    DeltaResult deltaResult
 
     static ExecController execController
 
@@ -53,15 +55,79 @@ class CategoryServiceTest {
                 repositoryFileServiceUrl: "/repository/file/:urn")
         mockHttpClient = new StubFor(Oct3HttpClient)
         delta = new RepoDelta(type: RepoValue.flixMedia, publication: "score", locale: "en_gb")
+        deltaResult = new DeltaResult()
     }
 
-    def runRetrieveCategoryFeed(RepoDelta delta) {
+    def runSaveCategoryFeed(String categoryFeed) {
         categoryService.httpClient = mockHttpClient.proxyInstance()
 
         def result = new BlockingVariable<String>(5)
         boolean valueSet = false
         execController.start {
-            categoryService.retrieveCategoryFeed(delta).subscribe({
+            categoryService.saveCategoryFeed(delta, categoryFeed, deltaResult.errors).subscribe({
+                valueSet = true
+                result.set(it)
+            }, {
+                log.error "error", it
+                result.set("error")
+            }, {
+                if (!valueSet) result.set("outOfFlow")
+            })
+        }
+        result.get()
+    }
+
+    @Test
+    void "test saveCategoryFeed"() {
+        def categoryFeed = getFileText("category_ru.xml")
+        mockHttpClient.demand.with {
+            doPost(1) { String url, InputStream is ->
+                assert url == "/repository/file/urn:flixmedia:score:en_gb:category.xml"
+                assert IOUtils.toString(is, EncodingUtil.CHARSET) == categoryFeed
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 200))
+            }
+        }
+        assert runSaveCategoryFeed(categoryFeed) == categoryFeed
+    }
+
+    @Test
+    void "test saveCategoryFeed could not save"() {
+        def categoryFeed = getFileText("category_ru.xml")
+        mockHttpClient.demand.with {
+            doPost(1) { String url, InputStream is ->
+                assert url == "/repository/file/urn:flixmedia:score:en_gb:category.xml"
+                assert IOUtils.toString(is, EncodingUtil.CHARSET) == categoryFeed
+                rx.Observable.just(new Oct3HttpResponse(statusCode: 404))
+            }
+        }
+        categoryService.httpClient = mockHttpClient.proxyInstance()
+
+        assert runSaveCategoryFeed(categoryFeed) == "outOfFlow"
+        assert deltaResult.errors == ["HTTP 404 error saving octopus category feed"]
+    }
+
+    @Test
+    void "test saveCategoryFeed exception in save"() {
+        def categoryFeed = getFileText("category_ru.xml")
+        mockHttpClient.demand.with {
+            doPost(1) { String url, InputStream is ->
+                assert url == "/repository/file/urn:flixmedia:score:en_gb:category.xml"
+                assert IOUtils.toString(is, EncodingUtil.CHARSET) == categoryFeed
+                throw new Exception("exception in save")
+            }
+        }
+        categoryService.httpClient = mockHttpClient.proxyInstance()
+
+        assert runSaveCategoryFeed(categoryFeed) == "error"
+    }
+
+    def runRetrieveCategoryFeed(String publication, String locale, List errors) {
+        categoryService.httpClient = mockHttpClient.proxyInstance()
+
+        def result = new BlockingVariable<String>(5)
+        boolean valueSet = false
+        execController.start {
+            categoryService.retrieveCategoryFeed(publication, locale, errors).subscribe({
                 valueSet = true
                 result.set(it)
             }, {
@@ -83,13 +149,12 @@ class CategoryServiceTest {
                 assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
                 rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: categoryFeed.bytes))
             }
-            doPost(1) { String url, InputStream is ->
-                assert url == "/repository/file/urn:flixmedia:score:en_gb:category.xml"
-                assert IOUtils.toString(is, EncodingUtil.CHARSET) == categoryFeed
-                rx.Observable.just(new Oct3HttpResponse(statusCode: 200))
-            }
         }
-        assert runRetrieveCategoryFeed(delta) == categoryFeed
+        categoryService.httpClient = mockHttpClient.proxyInstance()
+
+        List errors = []
+        assert runRetrieveCategoryFeed("score", "en_gb", errors) == categoryFeed
+        assert !errors
     }
 
     @Test
@@ -102,25 +167,9 @@ class CategoryServiceTest {
         }
         categoryService.httpClient = mockHttpClient.proxyInstance()
 
-        assert runRetrieveCategoryFeed(delta) == "outOfFlow"
-        assert delta.errors == ["HTTP 500 error getting octopus category feed"]
-    }
-
-    @Test
-    void "test retrieveCategoryFeed could not save"() {
-        mockHttpClient.demand.with {
-            doGet(1) {
-                assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
-                rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: CATEGORY_FEED.bytes))
-            }
-            doPost(1) { String url, InputStream is ->
-                rx.Observable.just(new Oct3HttpResponse(statusCode: 404))
-            }
-        }
-        categoryService.httpClient = mockHttpClient.proxyInstance()
-
-        assert runRetrieveCategoryFeed(delta) == "outOfFlow"
-        assert delta.errors == ["HTTP 404 error saving octopus category feed"]
+        List errors = []
+        assert runRetrieveCategoryFeed("score", "en_gb", errors) == "outOfFlow"
+        assert errors == ["HTTP 500 error getting octopus category feed"]
     }
 
     @Test
@@ -128,46 +177,14 @@ class CategoryServiceTest {
         mockHttpClient.demand.with {
             doGet(1) {
                 assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
-                throw new Exception("error in get")
+                throw new Exception("exception in get")
             }
         }
         categoryService.httpClient = mockHttpClient.proxyInstance()
 
-        assert runRetrieveCategoryFeed(delta) == "error"
-    }
-
-    def runRetrieveCategoryFeedForPublicationAndLocale(String publication, String locale, List errors) {
-        categoryService.httpClient = mockHttpClient.proxyInstance()
-
-        def result = new BlockingVariable<String>(5)
-        boolean valueSet = false
-        execController.start {
-            categoryService.retrieveCategoryFeed(publication, locale, errors).subscribe({
-                valueSet = true
-                result.set(it)
-            }, {
-                log.error "error", it
-                result.set("error")
-            }, {
-                if (!valueSet) result.set("outOfFlow")
-            })
-        }
-        result.get()
-    }
-
-    @Test
-    void "test retrieveCategoryFeed for publication and locale"() {
-        def categoryFeed = getFileText("category_ru.xml")
-
-        mockHttpClient.demand.with {
-            doGet(1) {
-                assert it == "/product/publications/SCORE/locales/en_GB/hierarchies/category"
-                rx.Observable.just(new Oct3HttpResponse(statusCode: 200, bodyAsBytes: categoryFeed.bytes))
-            }
-        }
-        categoryService.httpClient = mockHttpClient.proxyInstance()
-
-        assert runRetrieveCategoryFeedForPublicationAndLocale("score", "en_gb", []) == categoryFeed
+        List errors = []
+        assert runRetrieveCategoryFeed("score", "en_gb", errors) == "error"
+        assert !errors
     }
 
     def runFilterForCategory(List productUrls, String categoryFeed) {

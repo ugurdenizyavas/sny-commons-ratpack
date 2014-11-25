@@ -16,15 +16,6 @@ import groovy.util.logging.Slf4j
 @Slf4j
 class RepoDelta extends Delta implements Serializable {
 
-    String finalStartDate
-    String finalDeltaUrl
-
-    @JsonIgnore
-    List deltaUrns
-
-    @JsonIgnore
-    List errors = []
-
     @JsonIgnore
     URN getLastModifiedUrn() {
         new URNImpl(type.toString(), [RepoValue.last_modified.toString(), publication, locale])

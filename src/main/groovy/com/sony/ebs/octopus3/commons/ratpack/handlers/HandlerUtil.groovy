@@ -3,7 +3,7 @@ package com.sony.ebs.octopus3.commons.ratpack.handlers
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import groovy.json.JsonSlurper
-import org.apache.http.client.utils.URIBuilder
+import groovyx.net.http.URIBuilder
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
@@ -50,7 +50,7 @@ class HandlerUtil {
     static String addProcessId(String initialUrl, String processId) {
         new URIBuilder(initialUrl).with {
             if (processId) {
-                addParameter("processId", processId)
+                addQueryParam("processId", processId)
             }
             it.toString()
         }
