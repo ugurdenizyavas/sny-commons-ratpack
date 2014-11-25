@@ -109,24 +109,17 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
         responseStorage.store(delta, JsonOutput.toJson(jsonRender.object))
     }
 
-    JsonRender processError(Delta delta, List<String> errors, DateTime startTime) {
+    JsonRender processResult(Delta delta, DeltaResult deltaResult, DateTime startTime) {
         finalizeInAsyncThread(delta)
 
-        activity.error "finished {} with errors: {}", delta, errors
         def endTime = new DateTime()
-        delta.status = 500
-
-        def jsonResponse = deltaResultService.createDeltaResultWithErrors(delta, errors, startTime, endTime)
-        storeResponse(delta, jsonResponse)
-        jsonResponse
-    }
-
-    JsonRender processSuccess(Delta delta, DeltaResult deltaResult, DateTime startTime) {
-        finalizeInAsyncThread(delta)
-
-        activity.info "finished {} with success", delta
-        def endTime = new DateTime()
-        delta.status = 200
+        if (deltaResult.errors) {
+            activity.error "finished {} with errors: {}", delta, deltaResult.errors
+            delta.status = 500
+        } else {
+            activity.info "finished {} with success", delta
+            delta.status = 200
+        }
 
         def jsonResponse = deltaResultService.createDeltaResult(delta, deltaResult, startTime, endTime)
         storeResponse(delta, jsonResponse)

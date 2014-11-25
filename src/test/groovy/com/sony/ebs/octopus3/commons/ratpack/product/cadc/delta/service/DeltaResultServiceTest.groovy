@@ -67,8 +67,9 @@ class DeltaResultServiceTest {
     }
 
     @Test
-    void "createDeltaResultWithErrors"() {
-        def ren = deltaResultService.createDeltaResultWithErrors(delta, errors, startTime, endTime)?.object
+    void "createDeltaResult with errors"() {
+        def deltaResult = new DeltaResult(errors: errors)
+        def ren = deltaResultService.createDeltaResult(delta, deltaResult, startTime, endTime)?.object
         assert ren.status == 500
         assert ren.delta == delta
         assert ren.errors == errors

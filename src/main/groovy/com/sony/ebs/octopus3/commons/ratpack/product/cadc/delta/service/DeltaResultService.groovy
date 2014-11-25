@@ -31,37 +31,39 @@ class DeltaResultService {
         json(status: 400, errors: errors, delta: delta)
     }
 
-    JsonRender createDeltaResultWithErrors(Object delta, List<String> errors, DateTime startTime, DateTime endTime) {
-        def timeStats = HandlerUtil.getTimeStats(startTime, endTime)
-        json(status: 500, timeStats: timeStats, errors: errors, delta: delta)
-    }
-
     JsonRender createDeltaResult(Object delta, DeltaResult result, DateTime startTime, DateTime endTime) {
-        int sum = (result.categoryFilteredOutUrns?.size() ?: 0) + (result.eanCodeFilteredOutUrns?.size() ?: 0) + (result.successfulUrns?.size() ?: 0) + (result.unsuccessfulUrns?.size() ?: 0)
-        def resultMap = [
-                productErrors : result.productErrors,
-                stats         : [
-                        "number of delta products"                   : result.deltaUrns?.size(),
-                        "number of products filtered out by category": result.categoryFilteredOutUrns?.size(),
-                        "number of products filtered out by ean code": result.eanCodeFilteredOutUrns?.size(),
-                        "number of successful"                       : result.successfulUrns?.size(),
-                        "number of unsuccessful"                     : result.unsuccessfulUrns?.size(),
-                        "sum"                                        : sum
-                ],
-                urns          : [
-                        deltaUrns              : result.deltaUrns,
-                        categoryFilteredOutUrns: result.categoryFilteredOutUrns,
-                        eanCodeFilteredOutUrns : result.eanCodeFilteredOutUrns,
-                        successfulUrns         : result.successfulUrns,
-                        unsuccessfulUrns       : result.unsuccessfulUrns
-                ],
-                other         : result.other,
-                finalStartDate: result.finalStartDate,
-                finalDeltaUrl : result.finalDeltaUrl
-        ]
-
         def timeStats = HandlerUtil.getTimeStats(startTime, endTime)
-        json(status: 200, timeStats: timeStats, result: resultMap, delta: delta)
+        if (result.errors) {
+            def resultMap = [
+                    finalStartDate: result.finalStartDate,
+                    finalDeltaUrl : result.finalDeltaUrl
+            ]
+            json(status: 500, timeStats: timeStats, errors: result.errors, result: resultMap, delta: delta)
+        } else {
+            int sum = (result.categoryFilteredOutUrns?.size() ?: 0) + (result.eanCodeFilteredOutUrns?.size() ?: 0) + (result.successfulUrns?.size() ?: 0) + (result.unsuccessfulUrns?.size() ?: 0)
+            def resultMap = [
+                    productErrors : result.productErrors,
+                    stats         : [
+                            "number of delta products"                   : result.deltaUrns?.size(),
+                            "number of products filtered out by category": result.categoryFilteredOutUrns?.size(),
+                            "number of products filtered out by ean code": result.eanCodeFilteredOutUrns?.size(),
+                            "number of successful"                       : result.successfulUrns?.size(),
+                            "number of unsuccessful"                     : result.unsuccessfulUrns?.size(),
+                            "sum"                                        : sum
+                    ],
+                    urns          : [
+                            deltaUrns              : result.deltaUrns,
+                            categoryFilteredOutUrns: result.categoryFilteredOutUrns,
+                            eanCodeFilteredOutUrns : result.eanCodeFilteredOutUrns,
+                            successfulUrns         : result.successfulUrns,
+                            unsuccessfulUrns       : result.unsuccessfulUrns
+                    ],
+                    other         : result.other,
+                    finalStartDate: result.finalStartDate,
+                    finalDeltaUrl : result.finalDeltaUrl
+            ]
+            json(status: 200, timeStats: timeStats, result: resultMap, delta: delta)
+        }
     }
 
 }
