@@ -4,6 +4,7 @@ import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.encoding.EncodingUtil
 import com.sony.ebs.octopus3.commons.ratpack.encoding.MaterialNameEncoder
 import com.sony.ebs.octopus3.commons.ratpack.encoding.ProductUtil
+import com.sony.ebs.octopus3.commons.ratpack.handlers.HandlerUtil
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpClient
 import com.sony.ebs.octopus3.commons.ratpack.http.Oct3HttpResponse
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
@@ -32,25 +33,18 @@ class CategoryService {
         new URNImpl(delta.type.toString(), [delta.publication, delta.locale, RepoValue.category.toString() + ".xml"])
     }
 
-    rx.Observable<String> retrieveCategoryFeed(RepoDelta delta) {
-        String categoryFeed
+    rx.Observable<String> saveCategoryFeed(RepoDelta delta, String categoryFeed, List errors = []) {
         rx.Observable.just("starting").flatMap({
-            def urlPublication = ProductUtil.formatPublication(delta.publication)
-            def urlLocale = ProductUtil.formatLocale(delta.locale)
-            def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", urlPublication).replace(":locale", urlLocale)
-            log.info "category service url for {} is {}", delta, categoryReadUrl
-            httpClient.doGet(categoryReadUrl)
+            observe(execControl.blocking {
+                def urn = new URNImpl(delta.type.toString(), [delta.publication, delta.locale, RepoValue.category.toString() + ".xml"])
+                def initialUrl = repositoryFileServiceUrl.replace(":urn", urn.toString())
+                log.info "category save url for {} is {}", delta, initialUrl
+                HandlerUtil.addProcessId(initialUrl, delta.processId?.id)
+            })
+        }).flatMap({ url ->
+            httpClient.doPost(url, IOUtils.toInputStream(categoryFeed, EncodingUtil.CHARSET))
         }).filter({ Oct3HttpResponse response ->
-            response.isSuccessful("getting octopus category feed", delta.errors)
-        }).flatMap({ Oct3HttpResponse response ->
-            categoryFeed = IOUtils.toString(response.bodyAsStream, EncodingUtil.CHARSET)
-            def categoryUrn = getCategoryUrn(delta)
-            def categorySaveUrl = repositoryFileServiceUrl.replace(":urn", categoryUrn.toString())
-            log.info "category save url for {} is {}", delta, categorySaveUrl
-
-            httpClient.doPost(categorySaveUrl, IOUtils.toInputStream(categoryFeed, EncodingUtil.CHARSET))
-        }).filter({ Oct3HttpResponse response ->
-            response.isSuccessful("saving octopus category feed", delta.errors)
+            response.isSuccessful("saving octopus category feed", errors)
         }).map({
             categoryFeed
         })
@@ -58,11 +52,15 @@ class CategoryService {
 
     rx.Observable<String> retrieveCategoryFeed(String publication, String locale, List errors = []) {
         rx.Observable.just("starting").flatMap({
-            def urlPublication = ProductUtil.formatPublication(publication)
-            def urlLocale = ProductUtil.formatLocale(locale)
-            def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", urlPublication).replace(":locale", urlLocale)
-            log.info "category service url for {} {} is {}", publication, locale, categoryReadUrl
-            httpClient.doGet(categoryReadUrl)
+            observe(execControl.blocking {
+                def urlPublication = ProductUtil.formatPublication(publication)
+                def urlLocale = ProductUtil.formatLocale(locale)
+                def categoryReadUrl = octopusCategoryServiceUrl.replace(":publication", urlPublication).replace(":locale", urlLocale)
+                log.info "category service url for {} {} is {}", publication, locale, categoryReadUrl
+                categoryReadUrl
+            })
+        }).flatMap({ url ->
+            httpClient.doGet(url)
         }).filter({ Oct3HttpResponse response ->
             response.isSuccessful("getting octopus category feed", errors)
         }).map({ Oct3HttpResponse response ->

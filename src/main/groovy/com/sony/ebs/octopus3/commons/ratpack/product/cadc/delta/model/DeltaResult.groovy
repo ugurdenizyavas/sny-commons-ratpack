@@ -17,8 +17,8 @@ class DeltaResult {
     List<String> eanCodeFilteredOutUrns
     List<String> successfulUrns
     List<String> unsuccessfulUrns
-    Map productErrors
-    Map other
+    Map productErrors = [:]
+    Map other = [:]
 
     String finalStartDate
     String finalDeltaUrl
