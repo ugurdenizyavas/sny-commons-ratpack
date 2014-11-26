@@ -47,8 +47,10 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
     }
 
     void finalizeInAsyncThread(delta) {
-        ongoingProcesses.remove delta.ticket
-        log.info "Process {} is removed from ongoing processes. Remaining processes are {}", delta, ongoingProcesses
+        if (ongoingProcesses != null) {
+            ongoingProcesses.remove delta.ticket
+            log.info "Process {} is removed from ongoing processes. Remaining processes are {}", delta, ongoingProcesses
+        }
     }
 
     /**
@@ -76,7 +78,7 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
         if (!errors) {
             ongoingProcesses = populateOngoingProcesses()
 
-            if (delta.ticket in ongoingProcesses) {
+            if (ongoingProcesses != null && delta.ticket in ongoingProcesses) {
                 log.warn "Duplicate request ignored for delta {}", delta
                 activity.warn "{} request is ignored because there's already an ongoing delta for {}-{}", delta, delta.publication, delta.locale
                 delta.status = 400
@@ -88,7 +90,9 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
                 context.response.status 400
                 context.render jsonResponse
             } else {
-                ongoingProcesses << delta.ticket
+                if (ongoingProcesses != null) {
+                    ongoingProcesses << delta.ticket
+                }
                 flowHandle context, delta
             }
         } else {
@@ -131,8 +135,8 @@ abstract class HazelcastAwareDeltaHandler<D extends Delta> extends GroovyHandler
      * else returns a new list
      */
     final def populateOngoingProcesses() {
-        if (!ongoingProcesses) {
-            ongoingProcesses = hazelcastInstance ? hazelcastInstance.getList("ongoingProcesses") : new CopyOnWriteArrayList<Set>()
+        if (hazelcastInstance && !ongoingProcesses) {
+            ongoingProcesses = hazelcastInstance?.getList("ongoingProcesses")
         }
     }
 
