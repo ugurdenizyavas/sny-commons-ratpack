@@ -1,8 +1,8 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.DeltaType
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import org.junit.Before
@@ -19,10 +19,10 @@ class RequestValidatorTest {
     @Before
     void before() {
         validator = new RequestValidator()
-        cadcDelta = new CadcDelta(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", since: "2014-07-05T00:00:00.000Z")
-        cadcProduct = new CadcProduct(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
-        repoDelta = new RepoDelta(type: DeltaType.global_sheet, publication: "GLOBAL", locale: "en_GB")
-        repoProduct = new RepoProduct(type: DeltaType.global_sheet, publication: "SCORE", locale: "en_GB", sku: "a")
+        cadcDelta = new CadcDelta(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", sdate: "2014-07-05T00:00:00.000Z")
+        cadcProduct = new CadcProduct(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
+        repoDelta = new RepoDelta(type: RepoValue.global_sheet, publication: "GLOBAL", locale: "en_GB")
+        repoProduct = new RepoProduct(type: RepoValue.global_sheet, publication: "SCORE", locale: "en_GB", sku: "a")
     }
 
     @Test
@@ -55,33 +55,33 @@ class RequestValidatorTest {
     }
 
     @Test
-    void "validate since value null"() {
-        cadcDelta.since = null
+    void "validate sdate value null"() {
+        cadcDelta.sdate = null
         assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
-    void "validate since value empty"() {
-        cadcDelta.since = ""
+    void "validate sdate value empty"() {
+        cadcDelta.sdate = ""
         assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
-    void "validate since value all"() {
-        cadcDelta.since = "All"
+    void "validate sdate value all"() {
+        cadcDelta.sdate = "All"
         assert !validator.validateCadcDelta(cadcDelta)
     }
 
     @Test
-    void "validate since value invalid"() {
-        cadcDelta.since = "2014-07-05T00-00:00.000Z"
-        assert validator.validateCadcDelta(cadcDelta) == ["since parameter is invalid"]
+    void "validate sdate value invalid"() {
+        cadcDelta.sdate = "2014-07-05T00-00:00.000Z"
+        assert validator.validateCadcDelta(cadcDelta) == ["sdate parameter is invalid"]
     }
 
     @Test
-    void "validate since value short and invalid"() {
-        cadcDelta.since = "2014-07-05T00:00:00"
-        assert validator.validateCadcDelta(cadcDelta) == ["since parameter is invalid"]
+    void "validate sdate value short and invalid"() {
+        cadcDelta.sdate = "2014-07-05T00:00:00"
+        assert validator.validateCadcDelta(cadcDelta) == ["sdate parameter is invalid"]
     }
 
     @Test
@@ -175,7 +175,7 @@ class RequestValidatorTest {
 
     @Test
     void "validate deltaRepo"() {
-        assert !validator.validateRepoDelta(repoDelta)
+        assert !validator.validateDelta(repoDelta)
     }
 
     @Test
@@ -183,7 +183,7 @@ class RequestValidatorTest {
         repoDelta.with {
             type = null
         }
-        assert validator.validateRepoDelta(repoDelta) == ["type parameter is invalid"]
+        assert validator.validateDelta(repoDelta) == ["type parameter is invalid"]
     }
 
     @Test
@@ -191,7 +191,7 @@ class RequestValidatorTest {
         repoDelta.with {
             sdate = "2014-07-09T00:00:00.000Z"
         }
-        assert !validator.validateRepoDelta(repoDelta)
+        assert !validator.validateDelta(repoDelta)
     }
 
     @Test
@@ -199,7 +199,7 @@ class RequestValidatorTest {
         repoDelta.with {
             sdate = "s1"
         }
-        assert validator.validateRepoDelta(repoDelta) == ["sdate parameter is invalid"]
+        assert validator.validateDelta(repoDelta) == ["sdate parameter is invalid"]
     }
 
     @Test
@@ -207,7 +207,7 @@ class RequestValidatorTest {
         repoDelta.with {
             edate = "2014-07-09T00:00:00.000Z"
         }
-        assert !validator.validateRepoDelta(repoDelta)
+        assert !validator.validateDelta(repoDelta)
     }
 
     @Test
@@ -215,7 +215,7 @@ class RequestValidatorTest {
         repoDelta.with {
             edate = "s2"
         }
-        assert validator.validateRepoDelta(repoDelta) == ["edate parameter is invalid"]
+        assert validator.validateDelta(repoDelta) == ["edate parameter is invalid"]
     }
 
     @Test

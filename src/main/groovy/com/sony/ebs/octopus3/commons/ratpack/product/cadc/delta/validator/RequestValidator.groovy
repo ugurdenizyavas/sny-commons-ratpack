@@ -1,13 +1,14 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
 import com.sony.ebs.octopus3.commons.date.ISODateUtils
+import com.sony.ebs.octopus3.commons.flows.Delta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import groovy.util.logging.Slf4j
+import groovyx.net.http.URIBuilder
 import org.apache.commons.lang.LocaleUtils
-import org.apache.http.client.utils.URIBuilder
 
 @Slf4j
 class RequestValidator {
@@ -72,8 +73,8 @@ class RequestValidator {
         validatePublication(delta.publication, errors)
         validateLocale(delta.locale, errors)
 
-        if (delta.since && !delta.since.equalsIgnoreCase("all")) {
-            validateDate("since", delta.since, errors)
+        if (delta.sdate && !delta.sdate.equalsIgnoreCase("all")) {
+            validateDate("sdate", delta.sdate, errors)
         }
 
         if (!validateUrl(delta.cadcUrl)) {
@@ -82,7 +83,7 @@ class RequestValidator {
         errors
     }
 
-    List validateRepoDelta(RepoDelta delta) {
+    List validateDelta(Delta delta) {
         List errors = []
 
         if (!delta.type) {

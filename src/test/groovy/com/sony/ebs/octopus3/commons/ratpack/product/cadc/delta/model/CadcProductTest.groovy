@@ -1,5 +1,6 @@
 package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model
 
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import org.junit.Before
 import org.junit.Test
 
@@ -9,12 +10,12 @@ class CadcProductTest {
 
     @Before
     void before() {
-        product = new CadcProduct(type: DeltaType.global_sku, publication: "SCORE", locale: "en_GB", materialName: "aaa")
+        product = new CadcProduct(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB")
     }
 
     @Test
-    void "getUrnForSubType"() {
-        assert product.getUrnForSubType(DeltaType.previous).toString() == "urn:global_sku:previous:score:en_gb:aaa"
+    void "getOutUrn"() {
+        assert product.getOutputUrn("x1").toString() == "urn:global_sku:score:en_gb:x1"
     }
 
 }

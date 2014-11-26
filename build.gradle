@@ -96,9 +96,9 @@ configurations.optional.transitive = false
 //======================================================================
 
 dependencies {
-    compile 'commons-lang:commons-lang:2.4'
+    compile 'commons-lang:commons-lang:2.6'
 
-    compile 'com.sony.ebs.octopus3:octopus3-commons:1.3'
+    compile 'com.sony.ebs.octopus3:octopus3-commons:1.4-SNAPSHOT'
 
     // spring
     provided "org.springframework:spring-core:$springVersion"
@@ -136,6 +136,9 @@ dependencies {
         exclude group: 'org.slf4j'
         exclude group: 'org.apache.httpcomponents'
     }
+
+    //mongodb
+    compile 'org.springframework.data:spring-data-mongodb:1.6.0.RELEASE'
 }
 
 //======================================================================
