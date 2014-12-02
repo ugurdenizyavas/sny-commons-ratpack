@@ -2,9 +2,9 @@ package com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.validator
 
 import com.sony.ebs.octopus3.commons.date.ISODateUtils
 import com.sony.ebs.octopus3.commons.flows.Delta
+import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import groovy.util.logging.Slf4j
 import groovyx.net.http.URIBuilder
@@ -109,8 +109,8 @@ class RequestValidator {
         }
         validatePublication(product.publication, errors)
         validateLocale(product.locale, errors)
-        if (!validateUrl(product.url)) {
-            errors << "url parameter is invalid"
+        if (!validateUrl(product.cadcUrl)) {
+            errors << "cadcUrl parameter is invalid"
         }
         errors
     }
@@ -123,7 +123,7 @@ class RequestValidator {
         }
         validatePublication(product.publication, errors)
         validateLocale(product.locale, errors)
-        if (!product.sku) {
+        if (product.type && product.type != RepoValue.category && !product.sku) {
             errors << "sku parameter is invalid"
         }
         errors

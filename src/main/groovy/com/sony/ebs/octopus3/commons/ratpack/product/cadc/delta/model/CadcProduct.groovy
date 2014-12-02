@@ -18,7 +18,7 @@ class CadcProduct {
     RepoValue type
     String publication
     String locale
-    String url
+    String cadcUrl
     String processId
 
     @JsonIgnore
