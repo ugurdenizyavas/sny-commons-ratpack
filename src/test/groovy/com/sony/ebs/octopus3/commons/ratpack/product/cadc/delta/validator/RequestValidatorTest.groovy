@@ -15,6 +15,7 @@ class RequestValidatorTest {
     CadcProduct cadcProduct
     RepoDelta repoDelta
     RepoProduct repoProduct
+    RepoProduct categoryProduct
 
     @Before
     void before() {
@@ -23,6 +24,7 @@ class RequestValidatorTest {
         cadcProduct = new CadcProduct(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "//a")
         repoDelta = new RepoDelta(type: RepoValue.global_sheet, publication: "GLOBAL", locale: "en_GB")
         repoProduct = new RepoProduct(type: RepoValue.global_sheet, publication: "SCORE", locale: "en_GB", sku: "a")
+        categoryProduct = new RepoProduct(type: RepoValue.category, publication: "SCORE", locale: "en_GB")
     }
 
     @Test
@@ -245,6 +247,35 @@ class RequestValidatorTest {
     void "validate repo delta item invalid materialName"() {
         repoProduct.sku = null
         assert validator.validateRepoProduct(repoProduct) == ["sku parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo category item"() {
+        assert !validator.validateRepoProduct(categoryProduct)
+    }
+
+    @Test
+    void "validate repo category item type null"() {
+        categoryProduct.type = null
+        assert validator.validateRepoProduct(categoryProduct) == ["type parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo category item invalid publication"() {
+        categoryProduct.publication = null
+        assert validator.validateRepoProduct(categoryProduct) == ["publication parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo category item invalid locale"() {
+        categoryProduct.locale = null
+        assert validator.validateRepoProduct(categoryProduct) == ["locale parameter is invalid"]
+    }
+
+    @Test
+    void "validate repo category item invalid materialName"() {
+        categoryProduct.sku = null
+        assert !validator.validateRepoProduct(categoryProduct)
     }
 
 }

@@ -123,7 +123,7 @@ class RequestValidator {
         }
         validatePublication(product.publication, errors)
         validateLocale(product.locale, errors)
-        if (product.type != RepoValue.category && !product.sku) {
+        if (product.type && product.type != RepoValue.category && !product.sku) {
             errors << "sku parameter is invalid"
         }
         errors
