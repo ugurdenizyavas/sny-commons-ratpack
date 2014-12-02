@@ -110,7 +110,7 @@ class RequestValidator {
         validatePublication(product.publication, errors)
         validateLocale(product.locale, errors)
         if (!validateUrl(product.cadcUrl)) {
-            errors << "url parameter is invalid"
+            errors << "cadcUrl parameter is invalid"
         }
         errors
     }

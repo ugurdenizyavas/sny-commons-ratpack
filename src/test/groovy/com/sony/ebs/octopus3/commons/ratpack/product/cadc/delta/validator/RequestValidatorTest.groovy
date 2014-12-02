@@ -160,7 +160,7 @@ class RequestValidatorTest {
     @Test
     void "validate delta item invalid url"() {
         cadcProduct.cadcUrl = "/a"
-        assert validator.validateCadcProduct(cadcProduct) == ["url parameter is invalid"]
+        assert validator.validateCadcProduct(cadcProduct) == ["cadcUrl parameter is invalid"]
     }
 
     @Test
