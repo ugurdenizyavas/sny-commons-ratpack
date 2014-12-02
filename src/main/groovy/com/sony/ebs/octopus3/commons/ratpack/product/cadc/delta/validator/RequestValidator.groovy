@@ -5,7 +5,6 @@ import com.sony.ebs.octopus3.commons.flows.Delta
 import com.sony.ebs.octopus3.commons.flows.RepoValue
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.CadcProduct
-import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoDelta
 import com.sony.ebs.octopus3.commons.ratpack.product.cadc.delta.model.RepoProduct
 import groovy.util.logging.Slf4j
 import groovyx.net.http.URIBuilder
@@ -110,7 +109,7 @@ class RequestValidator {
         }
         validatePublication(product.publication, errors)
         validateLocale(product.locale, errors)
-        if (!validateUrl(product.url)) {
+        if (!validateUrl(product.cadcUrl)) {
             errors << "url parameter is invalid"
         }
         errors

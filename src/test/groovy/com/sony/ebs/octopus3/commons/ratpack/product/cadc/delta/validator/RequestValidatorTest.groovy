@@ -20,7 +20,7 @@ class RequestValidatorTest {
     void before() {
         validator = new RequestValidator()
         cadcDelta = new CadcDelta(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "http://aaa/bbb", sdate: "2014-07-05T00:00:00.000Z")
-        cadcProduct = new CadcProduct(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", url: "//a")
+        cadcProduct = new CadcProduct(type: RepoValue.global_sku, publication: "SCORE", locale: "en_GB", cadcUrl: "//a")
         repoDelta = new RepoDelta(type: RepoValue.global_sheet, publication: "GLOBAL", locale: "en_GB")
         repoProduct = new RepoProduct(type: RepoValue.global_sheet, publication: "SCORE", locale: "en_GB", sku: "a")
     }
@@ -157,7 +157,7 @@ class RequestValidatorTest {
 
     @Test
     void "validate delta item invalid url"() {
-        cadcProduct.url = "/a"
+        cadcProduct.cadcUrl = "/a"
         assert validator.validateCadcProduct(cadcProduct) == ["url parameter is invalid"]
     }
 
